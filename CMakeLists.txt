@@ -73,12 +73,12 @@ foreach(f ${QML_FILES})
     set_source_files_properties(${f} PROPERTIES QT_RESOURCE_ALIAS ${name})
 endforeach()
 
-set_source_files_properties(qml/images/boot_logo.png PROPERTIES QT_RESOURCE_ALIAS boot_logo.png)
+set_source_files_properties(qml/images/boot_logo.jpg PROPERTIES QT_RESOURCE_ALIAS boot_logo.jpg)
 qt_add_qml_module(headunit
     URI HeadUnit
     VERSION 1.0
     QML_FILES ${QML_FILES}
-    RESOURCES qml/images/boot_logo.png
+    RESOURCES qml/images/boot_logo.jpg
 )
 target_link_libraries(headunit PRIVATE headunit_core Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia)
 

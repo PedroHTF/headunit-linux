@@ -1,7 +1,6 @@
 import QtQuick
 
-// Logo padrão: imagem "HR-V" cromada com reflexo em terracota e asterisco
-// (gerada por tools/make_logo.py). Entra com um fade suave.
+// Logo padrão: imagem HR-V (qml/images/boot_logo.jpg). Entra com um fade suave.
 Rectangle {
     id: root
     property bool animate: true
@@ -10,7 +9,7 @@ Rectangle {
     Image {
         id: img
         anchors.fill: parent
-        source: "boot_logo.png"
+        source: "boot_logo.jpg"
         fillMode: Image.PreserveAspectFit
         smooth: true
         mipmap: true
