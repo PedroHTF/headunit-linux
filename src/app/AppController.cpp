@@ -2,9 +2,11 @@
 
 #include "hal/DrivingRules.h"
 
-AppController::AppController(VehicleHal *vehicle, RadioHal *radio, MediaPlayerController *player, QObject *parent)
-    : QObject(parent), m_vehicle(vehicle), m_radio(radio), m_player(player)
+AppController::AppController(VehicleHal *vehicle, RadioHal *radio, MediaPlayerController *player,
+                             AppSettings *settings, QObject *parent)
+    : QObject(parent), m_vehicle(vehicle), m_radio(radio), m_player(player), m_settings(settings)
 {
+    connect(m_settings, &AppSettings::changed, this, &AppController::drivingStateChanged);
     connect(m_vehicle, &VehicleHal::steeringKey, this, &AppController::handleKey);
     connect(m_vehicle, &VehicleHal::stateChanged, this, &AppController::onVehicleChanged);
     connect(m_player, &MediaPlayerController::playbackStarted, this, [this] {
@@ -14,7 +16,7 @@ AppController::AppController(VehicleHal *vehicle, RadioHal *radio, MediaPlayerCo
     m_wasPowered = m_vehicle->powered();
 }
 
-bool AppController::videoAllowed() const { return DrivingRules::isVideoAllowed(m_vehicle->speedKmh()); }
+bool AppController::videoAllowed() const { return DrivingRules::isVideoAllowed(m_vehicle->speedKmh(), m_settings->videoWhileDriving()); }
 
 bool AppController::showReverseCamera() const
 {

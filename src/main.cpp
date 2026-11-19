@@ -1,4 +1,5 @@
 #include "app/AppController.h"
+#include "app/AppSettings.h"
 #include "hal/SimulatedRadioHal.h"
 #include "hal/SimulatedVehicleHal.h"
 #include "media/MediaLibrary.h"
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
     const QCommandLineOption noSimOpt(QStringLiteral("no-simulator"), QStringLiteral("Não abre a janela do simulador."));
     const QCommandLineOption fullOpt(QStringLiteral("fullscreen"), QStringLiteral("Tela cheia (como na central)."));
     const QCommandLineOption pageOpt(QStringLiteral("page"),
-        QStringLiteral("Tela inicial: 0 Início, 1 Mídia, 2 Rádio, 3 Veículo, 4 Projeção."), QStringLiteral("n"), QStringLiteral("0"));
+        QStringLiteral("Tela inicial: 0 Início, 1 Mídia, 2 Rádio, 3 Veículo, 4 Projeção, 5 Configurações."), QStringLiteral("n"), QStringLiteral("0"));
     const QCommandLineOption shotOpt(QStringLiteral("screenshot"),
         QStringLiteral("Salva uma captura da tela principal em <arquivo> e sai (testes/documentação)."), QStringLiteral("arquivo"));
     cli.addOptions({mediaOpt, noSimOpt, fullOpt, pageOpt, shotOpt});
@@ -53,7 +54,8 @@ int main(int argc, char *argv[])
     MediaLibrary library;
     library.setRootPath(QDir::toNativeSeparators(mediaDir));
     MediaPlayerController player(&library);
-    AppController controller(&vehicle, &radio, &player);
+    AppSettings settings;
+    AppController controller(&vehicle, &radio, &player, &settings);
     PerfMonitor perf(sinceStart);
 
     QQuickStyle::setStyle(QStringLiteral("Basic"));
@@ -66,6 +68,7 @@ int main(int argc, char *argv[])
     ctx->setContextProperty(QStringLiteral("player"), &player);
     ctx->setContextProperty(QStringLiteral("app"), &controller);
     ctx->setContextProperty(QStringLiteral("perf"), &perf);
+    ctx->setContextProperty(QStringLiteral("settings"), &settings);
     ctx->setContextProperty(QStringLiteral("showSimulator"), !cli.isSet(noSimOpt));
     ctx->setContextProperty(QStringLiteral("startFullscreen"), cli.isSet(fullOpt));
     ctx->setContextProperty(QStringLiteral("startPage"), cli.value(pageOpt).toInt());

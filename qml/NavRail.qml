@@ -8,7 +8,8 @@ Rectangle {
         { label: "Mídia", glyph: "♫" },
         { label: "Rádio", glyph: "≋" },
         { label: "Veículo", glyph: "◈" },
-        { label: "Projeção", glyph: "⧉" }
+        { label: "Projeção", glyph: "⧉" },
+        { label: "Config.", glyph: "⚙" }
     ]
     color: Theme.surface
 

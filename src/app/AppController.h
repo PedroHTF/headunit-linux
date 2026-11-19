@@ -1,5 +1,6 @@
 #pragma once
 
+#include "app/AppSettings.h"
 #include "hal/RadioHal.h"
 #include "hal/VehicleHal.h"
 #include "media/MediaPlayerController.h"
@@ -18,7 +19,8 @@ class AppController : public QObject
     Q_PROPERTY(bool showReverseCamera READ showReverseCamera NOTIFY drivingStateChanged)
 
 public:
-    AppController(VehicleHal *vehicle, RadioHal *radio, MediaPlayerController *player, QObject *parent = nullptr);
+    AppController(VehicleHal *vehicle, RadioHal *radio, MediaPlayerController *player,
+                  AppSettings *settings, QObject *parent = nullptr);
 
     /** "none", "media" ou "radio". */
     QString audioSource() const { return m_source; }
@@ -41,6 +43,7 @@ private:
     VehicleHal *m_vehicle;
     RadioHal *m_radio;
     MediaPlayerController *m_player;
+    AppSettings *m_settings;
     QString m_source = QStringLiteral("none");
     bool m_wasPowered = true;
 };

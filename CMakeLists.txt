@@ -26,6 +26,7 @@ qt_add_library(headunit_core STATIC
     src/media/MediaLibrary.h src/media/MediaLibrary.cpp
     src/media/MediaPlayerController.h src/media/MediaPlayerController.cpp
     src/app/AppController.h src/app/AppController.cpp
+    src/app/AppSettings.h src/app/AppSettings.cpp
     src/perf/PerfMonitor.h src/perf/PerfMonitor.cpp
 )
 target_include_directories(headunit_core PUBLIC src)
@@ -48,6 +49,7 @@ set(QML_FILES
     qml/RadioPage.qml
     qml/VehiclePage.qml
     qml/ProjectionPage.qml
+    qml/SettingsPage.qml
     qml/ReverseCameraOverlay.qml
     qml/PowerOffOverlay.qml
     qml/SimulatorWindow.qml

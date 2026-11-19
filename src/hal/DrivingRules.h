@@ -8,7 +8,11 @@ namespace DrivingRules {
 /** Acima desta velocidade o vídeo é ocultado (o áudio continua). */
 constexpr double VideoSpeedLimitKmh = 5.0;
 
-inline bool isVideoAllowed(double speedKmh) { return speedKmh < VideoSpeedLimitKmh; }
+/** @param allowWhileDriving configuração do usuário "vídeo em qualquer velocidade". */
+inline bool isVideoAllowed(double speedKmh, bool allowWhileDriving = false)
+{
+    return allowWhileDriving || speedKmh < VideoSpeedLimitKmh;
+}
 
 inline bool shouldShowReverseCamera(VehicleHal::Ignition ignition, VehicleHal::Gear gear)
 {

@@ -19,7 +19,7 @@ com o hardware do carro simulado.
 | Função | Situação |
 |---|---|
 | Músicas e vídeos do "pendrive" (uma pasta no PC), atualizando sozinho | ✅ real (QtMultimedia) |
-| Vídeo oculto com o carro em movimento (> 5 km/h) | ✅ |
+| Vídeo oculto com o carro em movimento (> 5 km/h), desativável em Configurações | ✅ |
 | Rádio FM/AM: sintonia, busca, memórias, RDS, lista de estações | 🟡 simulado (sem áudio) |
 | Ignição/ACC, marcha, velocidade | 🟡 simulados (janela "Simulador") |
 | Câmera de ré automática ao engatar a ré | 🟡 imagem simulada com linhas-guia |
@@ -49,7 +49,7 @@ Coloque músicas/vídeos na pasta `HeadUnitUSB` dentro da sua pasta de usuário
 headunit --media D:\Musicas     pasta que simula o pendrive
 headunit --fullscreen           tela cheia, como na central
 headunit --no-simulator         sem a janela do simulador
-headunit --page 2               abre direto numa tela (0 Início ... 4 Projeção)
+headunit --page 2               abre direto numa tela (0 Início ... 5 Configurações)
 headunit --screenshot tela.png  salva uma captura e sai
 ```
 

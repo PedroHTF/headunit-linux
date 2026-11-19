@@ -51,6 +51,7 @@ Window {
                 RadioPage {}
                 VehiclePage {}
                 ProjectionPage {}
+                SettingsPage {}
             }
         }
     }

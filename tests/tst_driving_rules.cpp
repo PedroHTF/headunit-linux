@@ -3,6 +3,8 @@
 #include "hal/SimulatedRadioHal.h"
 #include "hal/SimulatedVehicleHal.h"
 
+#include <QSettings>
+#include <QTemporaryDir>
 #include <QtTest>
 
 class TestDrivingRules : public QObject
@@ -13,6 +15,7 @@ private slots:
     {
         QVERIFY(DrivingRules::isVideoAllowed(0));
         QVERIFY(!DrivingRules::isVideoAllowed(30));
+        QVERIFY(DrivingRules::isVideoAllowed(120, true));
     }
 
     void reverseCamera()
@@ -29,12 +32,17 @@ private slots:
         SimulatedRadioHal radio(nullptr, 1);
         MediaLibrary library;
         MediaPlayerController player(&library);
-        AppController app(&vehicle, &radio, &player);
+        QTemporaryDir dir;
+        QSettings storage(dir.filePath(QStringLiteral("s.ini")), QSettings::IniFormat);
+        AppSettings settings(&storage);
+        AppController app(&vehicle, &radio, &player, &settings);
 
         vehicle.setGearByName(QStringLiteral("R"));
         QVERIFY(app.showReverseCamera());
         vehicle.setSpeed(40);
         QVERIFY(!app.videoAllowed());
+        settings.setVideoWhileDriving(true);
+        QVERIFY(app.videoAllowed());
 
         // Botão "Fonte" liga o rádio; ACC desligado desliga.
         vehicle.pressKey(QStringLiteral("mode"));
