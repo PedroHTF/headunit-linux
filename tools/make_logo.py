@@ -38,7 +38,8 @@ def letter_R(x):
     shapes = [("rrect", x, 0, x + w, 0.64, 0.28, "right"),
               ("clear_rrect", x + T * 1.1, 0.23, x + w - T, 0.43, 0.09, "right"),
               ("rect", x, 0, x + T * 1.1, 1),
-              ("poly", [(x + 0.46, 0.43), (x + 0.94, 0.43), (x + 1.46, 1.0), (x + 0.98, 1.0)])]
+              # Perna separada do "olho" por uma fenda; nasce da haste, abaixo dele.
+              ("poly", [(x + 0.30, 0.70), (x + 0.88, 0.70), (x + 1.46, 1.0), (x + 0.98, 1.0), (x + 0.30, 0.88)])]
     return shapes, w
 
 
