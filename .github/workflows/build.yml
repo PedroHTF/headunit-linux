@@ -1,0 +1,60 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependências
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qt6-base-dev qt6-declarative-dev qt6-multimedia-dev \
+            qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
+            qml6-module-qtquick-window qml6-module-qtqml-workerscript qml6-module-qtquick-templates \
+            qml6-module-qtmultimedia gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+            gstreamer1.0-libav libgl-dev cmake ninja-build
+      - name: Compilar
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+      - name: Testes
+        run: ctest --test-dir build --output-on-failure
+      - name: Captura de tela (verifica que a interface carrega)
+        run: QT_QPA_PLATFORM=offscreen ./build/headunit --no-simulator --screenshot inicio.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: captura-linux
+          path: inicio.png
+
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          arch: win64_msvc2022_64
+          modules: qtmultimedia
+          cache: true
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Compilar
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+      - name: Testes
+        run: ctest --test-dir build --output-on-failure
+      - name: Empacotar
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item build/headunit.exe dist/
+          windeployqt --release --qmldir qml dist/headunit.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: headunit-windows
+          path: dist/

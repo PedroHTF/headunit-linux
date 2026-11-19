@@ -1,0 +1,105 @@
+# headunit-linux
+
+Software para central multimídia automotiva com **sistema próprio**: Linux enxuto +
+interface em **Qt 6 / QML**. A ideia é substituir o Android da central por algo leve,
+com boot rápido. Durante o desenvolvimento, tudo roda no **PC (Windows ou Linux)**,
+com o hardware do carro simulado.
+
+> Projeto irmão: [`headunit-android`](https://github.com/PedroHTF/headunit-android),
+> o caminho mantendo o Android (e o Zlink).
+
+| Início | Mídia (pendrive) |
+|---|---|
+| ![Início](docs/img/inicio.png) | ![Mídia](docs/img/midia.png) |
+| **Rádio** | **Câmera de ré** |
+| ![Rádio](docs/img/radio.png) | ![Câmera de ré](docs/img/camera-re.png) |
+
+## O que já funciona
+
+| Função | Situação |
+|---|---|
+| Músicas e vídeos do "pendrive" (uma pasta no PC), atualizando sozinho | ✅ real (QtMultimedia) |
+| Vídeo oculto com o carro em movimento (> 5 km/h) | ✅ |
+| Rádio FM/AM: sintonia, busca, memórias, RDS, lista de estações | 🟡 simulado (sem áudio) |
+| Ignição/ACC, marcha, velocidade | 🟡 simulados (janela "Simulador") |
+| Câmera de ré automática ao engatar a ré | 🟡 imagem simulada com linhas-guia |
+| Tela apagada e áudio parado com ACC desligado | ✅ |
+| Botões do volante (próxima, anterior, play, volume, mudo, fonte) | ✅ simulador e teclado |
+| Métricas: tempo até o 1º quadro, FPS, memória | ✅ |
+| CarPlay / Android Auto | ⏳ planejado via dongle USB |
+| Bluetooth (chamadas, música) | ⏳ planejado (BlueZ + oFono/PipeWire) |
+
+## Rodar no Windows
+
+**Jeito rápido (sem instalar nada):** aba **Actions** do GitHub → execução mais recente →
+**Artifacts** → `headunit-windows` → descompacte e rode `headunit.exe`.
+
+**Para desenvolver:** siga **[docs/setup-windows.md](docs/setup-windows.md)** (Qt Creator).
+
+Ao abrir, aparecem duas janelas:
+- **HeadUnit** (1024×600): a tela da central.
+- **Simulador**: ignição, marcha, velocidade, volante, pendrive e desempenho.
+
+Coloque músicas/vídeos na pasta `HeadUnitUSB` dentro da sua pasta de usuário
+(ex.: `C:\Users\voce\HeadUnitUSB`). A lista atualiza sozinha.
+
+### Opções de linha de comando
+
+```
+headunit --media D:\Musicas     pasta que simula o pendrive
+headunit --fullscreen           tela cheia, como na central
+headunit --no-simulator         sem a janela do simulador
+headunit --page 2               abre direto numa tela (0 Início ... 4 Projeção)
+headunit --screenshot tela.png  salva uma captura e sai
+```
+
+### Atalhos de teclado (janela principal)
+
+`R` ré · `N` próxima · `B` anterior · `Espaço` play/pause · `F` fonte (mídia/rádio) ·
+`+`/`-` volume · `M` mudo
+
+## Arquitetura
+
+```
+qml/                  Interface (telas, componentes, janela do simulador)
+src/app/              AppController: fonte de áudio ativa, volante, ACC, regras
+src/media/            MediaLibrary (lista do pendrive) + MediaPlayerController
+src/hal/              Camada de hardware (HAL): a única parte que muda do PC para a central
+  VehicleHal            ← SimulatedVehicleHal | (futuro) McuVehicleHal / SocketCAN
+  RadioHal              ← SimulatedRadioHal  | (futuro) chip de rádio via MCU, RTL-SDR
+  DrivingRules          regras de segurança (vídeo em movimento, câmera de ré)
+src/perf/             PerfMonitor: 1º quadro, FPS, memória
+tests/                Testes (Qt Test): rádio, regras/controle, biblioteca de mídia
+```
+
+A montagem fica em `src/main.cpp`: na central, basta trocar `SimulatedVehicleHal` e
+`SimulatedRadioHal` pelas implementações reais. A interface e o resto não mudam.
+
+## Compilar pela linha de comando
+
+```bash
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+ctest --test-dir build --output-on-failure
+./build/headunit
+```
+
+Linux (Ubuntu 24.04): `sudo apt install qt6-base-dev qt6-declarative-dev qt6-multimedia-dev
+qml6-module-qtquick-controls qml6-module-qtquick-layouts qml6-module-qtmultimedia
+gstreamer1.0-plugins-good gstreamer1.0-libav cmake ninja-build`.
+
+Requer Qt **6.4 ou mais novo** (recomendado 6.8 LTS).
+
+## Desempenho
+
+Veja **[docs/desempenho.md](docs/desempenho.md)**: como medir e como limitar CPU/memória
+no PC para se aproximar da central.
+
+## Próximos passos
+
+1. Identificar o hardware da central (SoC, MCU, rádio) e decidir a viabilidade do Linux nela.
+2. `McuVehicleHal`: protocolo serial do MCU (ACC, ré, volante, CAN).
+3. Rádio real (chip da central) e, no PC, opcionalmente RTL-SDR.
+4. CarPlay/Android Auto via dongle USB.
+5. Bluetooth: chamadas, agenda e música.
+6. Imagem do sistema (Buildroot/Yocto) com boot rápido e sistema de arquivos somente leitura.
