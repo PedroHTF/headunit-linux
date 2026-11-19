@@ -1,5 +1,8 @@
 #include "app/AppController.h"
 #include "app/AppSettings.h"
+#include "camera/CameraSettings.h"
+#include "camera/ReverseCameraItem.h"
+#include "logo/LogoManager.h"
 #include "hal/SimulatedRadioHal.h"
 #include "hal/SimulatedVehicleHal.h"
 #include "media/MediaLibrary.h"
@@ -36,9 +39,13 @@ int main(int argc, char *argv[])
     const QCommandLineOption fullOpt(QStringLiteral("fullscreen"), QStringLiteral("Tela cheia (como na central)."));
     const QCommandLineOption pageOpt(QStringLiteral("page"),
         QStringLiteral("Tela inicial: 0 Início, 1 Mídia, 2 Rádio, 3 Veículo, 4 Projeção, 5 Configurações."), QStringLiteral("n"), QStringLiteral("0"));
+    const QCommandLineOption gearOpt(QStringLiteral("gear"), QStringLiteral("Marcha inicial do simulador (P, R, N, D)."), QStringLiteral("marcha"));
+    const QCommandLineOption steerOpt(QStringLiteral("steering"), QStringLiteral("Ângulo inicial do volante no simulador."), QStringLiteral("graus"));
+    const QCommandLineOption splashOpt(QStringLiteral("splash"), QStringLiteral("Mostra o logo mesmo com --screenshot."));
+    const QCommandLineOption setupOpt(QStringLiteral("camera-setup"), QStringLiteral("Abre direto o ajuste da câmera de ré."));
     const QCommandLineOption shotOpt(QStringLiteral("screenshot"),
         QStringLiteral("Salva uma captura da tela principal em <arquivo> e sai (testes/documentação)."), QStringLiteral("arquivo"));
-    cli.addOptions({mediaOpt, noSimOpt, fullOpt, pageOpt, shotOpt});
+    cli.addOptions({mediaOpt, noSimOpt, fullOpt, pageOpt, shotOpt, gearOpt, steerOpt, splashOpt, setupOpt});
     cli.process(app);
 
     QString mediaDir = cli.value(mediaOpt);
@@ -54,11 +61,17 @@ int main(int argc, char *argv[])
     MediaLibrary library;
     library.setRootPath(QDir::toNativeSeparators(mediaDir));
     MediaPlayerController player(&library);
+    if (cli.isSet(gearOpt)) vehicle.setGearByName(cli.value(gearOpt));
+    if (cli.isSet(steerOpt)) vehicle.setSteering(cli.value(steerOpt).toDouble());
     AppSettings settings;
+    CameraSettings cameraSettings;
+    LogoManager logo(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     AppController controller(&vehicle, &radio, &player, &settings);
     PerfMonitor perf(sinceStart);
 
     QQuickStyle::setStyle(QStringLiteral("Basic"));
+    qmlRegisterType<ReverseCameraItem>("HeadUnit.Camera", 1, 0, "ReverseCamera");
+    qmlRegisterUncreatableType<CameraSettings>("HeadUnit.Camera", 1, 0, "CameraSettings", QStringLiteral("Use cameraSettings"));
     QQmlApplicationEngine engine;
     QQmlContext *ctx = engine.rootContext();
     ctx->setContextProperty(QStringLiteral("vehicle"), &vehicle);
@@ -69,6 +82,11 @@ int main(int argc, char *argv[])
     ctx->setContextProperty(QStringLiteral("app"), &controller);
     ctx->setContextProperty(QStringLiteral("perf"), &perf);
     ctx->setContextProperty(QStringLiteral("settings"), &settings);
+    ctx->setContextProperty(QStringLiteral("cameraSettings"), &cameraSettings);
+    ctx->setContextProperty(QStringLiteral("logo"), &logo);
+    // Numa captura de tela o logo atrapalharia; --splash força.
+    ctx->setContextProperty(QStringLiteral("showSplashOnStart"), !cli.isSet(shotOpt) || cli.isSet(splashOpt));
+    ctx->setContextProperty(QStringLiteral("startCameraSetup"), cli.isSet(setupOpt));
     ctx->setContextProperty(QStringLiteral("showSimulator"), !cli.isSet(noSimOpt));
     ctx->setContextProperty(QStringLiteral("startFullscreen"), cli.isSet(fullOpt));
     ctx->setContextProperty(QStringLiteral("startPage"), cli.value(pageOpt).toInt());

@@ -20,6 +20,7 @@ class VehicleHal : public QObject
     Q_PROPERTY(QString gearLabel READ gearLabel NOTIFY stateChanged)
     Q_PROPERTY(double speedKmh READ speedKmh NOTIFY stateChanged)
     Q_PROPERTY(bool powered READ powered NOTIFY stateChanged)
+    Q_PROPERTY(double steeringDeg READ steeringDeg NOTIFY stateChanged)
 
 public:
     enum class Gear { Park, Reverse, Neutral, Drive, Unknown };
@@ -37,6 +38,8 @@ public:
     Ignition ignition() const { return m_ignition; }
     Gear gear() const { return m_gear; }
     double speedKmh() const { return m_speedKmh; }
+    /** Ângulo do volante (graus, + = direita). Na central vem da caixa CAN. */
+    double steeringDeg() const { return m_steeringDeg; }
     bool powered() const { return isPowered(m_ignition); }
 
     QString ignitionLabel() const;
@@ -56,9 +59,11 @@ signals:
 
 protected:
     void setState(Ignition ignition, Gear gear, double speedKmh);
+    void setSteeringState(double deg);
 
 private:
     Ignition m_ignition = Ignition::On;
     Gear m_gear = Gear::Park;
     double m_speedKmh = 0.0;
+    double m_steeringDeg = 0.0;
 };

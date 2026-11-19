@@ -12,6 +12,13 @@ void VehicleHal::setState(Ignition ignition, Gear gear, double speedKmh)
     emit stateChanged();
 }
 
+void VehicleHal::setSteeringState(double deg)
+{
+    if (qFuzzyCompare(deg + 1000, m_steeringDeg + 1000)) return;
+    m_steeringDeg = deg;
+    emit stateChanged();
+}
+
 QString VehicleHal::ignitionLabel() const
 {
     switch (m_ignition) {

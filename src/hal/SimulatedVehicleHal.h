@@ -8,6 +8,7 @@ class SimulatedVehicleHal : public VehicleHal
     Q_OBJECT
 public:
     static constexpr double MaxSpeedKmh = 200.0;
+    static constexpr double MaxSteeringDeg = 540.0;
 
     using VehicleHal::VehicleHal;
 
@@ -19,6 +20,7 @@ public:
     /** "P", "R", "N" ou "D". */
     Q_INVOKABLE void setGearByName(const QString &name);
     Q_INVOKABLE void setSpeed(double kmh);
+    Q_INVOKABLE void setSteering(double deg);
     /** "previous", "playpause", "next", "voldown", "volup", "mute", "mode". */
     Q_INVOKABLE void pressKey(const QString &key);
 };

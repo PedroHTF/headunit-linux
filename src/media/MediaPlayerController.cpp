@@ -28,6 +28,11 @@ void MediaPlayerController::playFromLibrary(int index)
     setPlaylist(m_library->visibleItems(), index);
 }
 
+void MediaPlayerController::playFolder(const QString &path, int index)
+{
+    setPlaylist(m_library->filesIn(path), index);
+}
+
 void MediaPlayerController::setPlaylist(const QVector<MediaItem> &items, int index)
 {
     m_playlist = items;

@@ -22,6 +22,11 @@ void SimulatedVehicleHal::setSpeed(double kmh)
     setState(ignition(), gear(), qBound(0.0, kmh, MaxSpeedKmh));
 }
 
+void SimulatedVehicleHal::setSteering(double deg)
+{
+    setSteeringState(qBound(-MaxSteeringDeg, deg, MaxSteeringDeg));
+}
+
 void SimulatedVehicleHal::pressKey(const QString &key)
 {
     Key k;

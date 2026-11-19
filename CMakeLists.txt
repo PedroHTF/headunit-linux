@@ -28,6 +28,14 @@ qt_add_library(headunit_core STATIC
     src/app/AppController.h src/app/AppController.cpp
     src/app/AppSettings.h src/app/AppSettings.cpp
     src/perf/PerfMonitor.h src/perf/PerfMonitor.cpp
+    src/camera/CameraModel.h src/camera/CameraModel.cpp
+    src/camera/Undistort.h src/camera/Undistort.cpp
+    src/camera/Guidelines.h src/camera/Guidelines.cpp
+    src/camera/SyntheticScene.h src/camera/SyntheticScene.cpp
+    src/camera/CameraSettings.h src/camera/CameraSettings.cpp
+    src/camera/ReverseCameraItem.h src/camera/ReverseCameraItem.cpp
+    src/logo/LogoManager.h src/logo/LogoManager.cpp
+    src/media/FolderTree.h
 )
 target_include_directories(headunit_core PUBLIC src)
 target_link_libraries(headunit_core PUBLIC Qt6::Core Qt6::Gui Qt6::Quick Qt6::Multimedia)
@@ -50,6 +58,9 @@ set(QML_FILES
     qml/VehiclePage.qml
     qml/ProjectionPage.qml
     qml/SettingsPage.qml
+    qml/CameraSetupPage.qml
+    qml/BootSplash.qml
+    qml/DefaultLogo.qml
     qml/ReverseCameraOverlay.qml
     qml/PowerOffOverlay.qml
     qml/SimulatorWindow.qml
@@ -72,7 +83,7 @@ target_link_libraries(headunit PRIVATE headunit_core Qt6::Quick Qt6::QuickContro
 # ---- Testes ---------------------------------------------------------------------
 if(TARGET Qt6::Test)
     enable_testing()
-    foreach(t tst_radio tst_driving_rules tst_media_library)
+    foreach(t tst_radio tst_driving_rules tst_media_library tst_camera tst_logo_folders)
         qt_add_executable(${t} tests/${t}.cpp)
         target_link_libraries(${t} PRIVATE headunit_core Qt6::Test)
         add_test(NAME ${t} COMMAND ${t})

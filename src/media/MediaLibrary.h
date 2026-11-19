@@ -12,6 +12,7 @@ struct MediaItem
     QString subtitle; // pasta (normalmente artista/álbum)
     QUrl url;
     bool isVideo = false;
+    QString folder; // relativa à raiz do pendrive, "" = raiz
 };
 
 /**
@@ -51,6 +52,19 @@ public:
     QVector<MediaItem> allItems() const { return m_all; }
 
     Q_INVOKABLE void rescan();
+
+    /** Pasta reservada do sistema no pendrive (logo etc.): fica fora da biblioteca. */
+    static QString systemFolder() { return QStringLiteral("HeadUnit"); }
+
+    /**
+     * Conteúdo de uma pasta: subpastas ({kind:"folder", name, path, count}) e depois
+     * arquivos ({kind:"file", title, subtitle, isVideo, index}).
+     */
+    Q_INVOKABLE QVariantList folderEntries(const QString &path) const;
+    Q_INVOKABLE QString parentFolder(const QString &path) const;
+    Q_INVOKABLE QString joinFolder(const QString &path, const QString &child) const;
+    /** Arquivos diretamente dentro de [path], na ordem exibida. */
+    QVector<MediaItem> filesIn(const QString &path) const;
 
     int rowCount(const QModelIndex &parent = {}) const override;
     QVariant data(const QModelIndex &index, int role) const override;

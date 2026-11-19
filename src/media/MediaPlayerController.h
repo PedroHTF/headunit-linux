@@ -27,6 +27,8 @@ public:
 
     /** Toca a lista visível da biblioteca a partir de [index]. */
     Q_INVOKABLE void playFromLibrary(int index);
+    /** Toca a pasta inteira (músicas e vídeos) a partir de [index]. */
+    Q_INVOKABLE void playFolder(const QString &path, int index);
     Q_INVOKABLE void togglePlayPause();
     Q_INVOKABLE void pause();
     Q_INVOKABLE void next();

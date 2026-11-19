@@ -20,6 +20,20 @@ Window {
     Shortcut { sequence: "M"; onActivated: app.pressKey("mute") }
     Shortcut { sequence: "F"; onActivated: app.pressKey("mode") }
     Shortcut { sequence: "R"; enabled: !!simVehicle; onActivated: simVehicle.setGearByName(vehicle.gearLabel === "R" ? "P" : "R") }
+    Shortcut { sequence: "Left"; enabled: !!simVehicle; onActivated: simVehicle.setSteering(vehicle.steeringDeg - 45) }
+    Shortcut { sequence: "Right"; enabled: !!simVehicle; onActivated: simVehicle.setSteering(vehicle.steeringDeg + 45) }
+
+    // Logo: ao abrir e, se configurado, toda vez que a ignição liga.
+    property bool splash: showSplashOnStart
+    property bool wasPowered: vehicle.powered
+    property bool cameraSetupOpen: startCameraSetup
+    Connections {
+        target: vehicle
+        function onStateChanged() {
+            if (vehicle.powered && !root.wasPowered && logo.onIgnition) root.splash = true
+            root.wasPowered = vehicle.powered
+        }
+    }
 
     RowLayout {
         anchors.fill: parent
@@ -51,14 +65,30 @@ Window {
                 RadioPage {}
                 VehiclePage {}
                 ProjectionPage {}
-                SettingsPage {}
+                SettingsPage {
+                    onOpenCameraSetup: root.cameraSetupOpen = true
+                    onPreviewLogo: root.splash = true
+                }
             }
         }
     }
 
-    ReverseCameraOverlay {
+    Loader {
         anchors.fill: parent
-        visible: app.showReverseCamera
+        active: app.showReverseCamera && !root.cameraSetupOpen
+        sourceComponent: ReverseCameraOverlay {}
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: root.cameraSetupOpen
+        sourceComponent: CameraSetupPage { onClosed: root.cameraSetupOpen = false }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: root.splash && vehicle.powered && !app.showReverseCamera
+        sourceComponent: BootSplash { onFinished: root.splash = false }
     }
 
     PowerOffOverlay {

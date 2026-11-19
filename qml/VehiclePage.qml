@@ -26,6 +26,7 @@ Item {
                 InfoRow { label: "Ignição"; value: vehicle.ignitionLabel }
                 InfoRow { label: "Marcha"; value: vehicle.gearLabel }
                 InfoRow { label: "Velocidade"; value: vehicle.speedKmh.toFixed(0) + " km/h" }
+                InfoRow { label: "Volante"; value: vehicle.steeringDeg.toFixed(0) + "°" }
                 InfoRow { label: "Vídeo permitido"; value: app.videoAllowed ? "Sim" : "Não (em movimento)" }
                 Item { Layout.fillHeight: true }
                 Text {
@@ -34,7 +35,7 @@ Item {
                     wrapMode: Text.WordWrap
                     color: Theme.textDim; font.pixelSize: Theme.fontSmall
                     text: "Dados simulados: use a janela \"Simulador\" ou o teclado " +
-                          "(R = ré, N/B = próxima/anterior, Espaço = play, F = fonte, +/- = volume, M = mudo)."
+                          "(R = ré, ←/→ = volante, N/B = próxima/anterior, Espaço = play, F = fonte, +/- = volume, M = mudo)."
                 }
             }
         }

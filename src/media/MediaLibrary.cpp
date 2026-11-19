@@ -1,5 +1,7 @@
 #include "media/MediaLibrary.h"
 
+#include "media/FolderTree.h"
+
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
@@ -55,10 +57,14 @@ void MediaLibrary::rescan()
             const bool video = isVideoFile(suffix);
             if (!video && !isAudioFile(suffix))
                 continue;
+            const QString folder = FolderTree::normalize(QDir(m_root).relativeFilePath(fi.absolutePath()));
+            if (folder.section(QLatin1Char('/'), 0, 0).compare(systemFolder(), Qt::CaseInsensitive) == 0)
+                continue; // HeadUnit/ (logo) não entra na biblioteca
             const QString parent = fi.dir().dirName();
             items.push_back({fi.completeBaseName(),
                              fi.dir() == QDir(m_root) ? QStringLiteral("USB") : parent,
-                             QUrl::fromLocalFile(fi.absoluteFilePath()), video});
+                             QUrl::fromLocalFile(fi.absoluteFilePath()), video,
+                             folder == u"." ? QString() : folder});
         }
     }
     std::sort(items.begin(), items.end(), [](const MediaItem &a, const MediaItem &b) {
@@ -92,6 +98,36 @@ void MediaLibrary::rewatch()
         dirs << it.next();
     m_watcher.addPaths(dirs);
 }
+
+QVector<MediaItem> MediaLibrary::filesIn(const QString &path) const
+{
+    const QString p = FolderTree::normalize(path);
+    QVector<MediaItem> out;
+    for (const MediaItem &m : m_all)
+        if (m.folder == p) out << m;
+    return out;
+}
+
+QVariantList MediaLibrary::folderEntries(const QString &path) const
+{
+    QStringList folders;
+    for (const MediaItem &m : m_all) folders << m.folder;
+    QVariantList out;
+    for (const QString &name : FolderTree::subfolders(folders, path)) {
+        const QString full = FolderTree::join(path, name);
+        out << QVariantMap{{"kind", "folder"}, {"name", name}, {"path", full},
+                           {"count", FolderTree::countUnder(folders, full)}};
+    }
+    const QVector<MediaItem> files = filesIn(path);
+    for (int i = 0; i < files.size(); ++i) {
+        out << QVariantMap{{"kind", "file"}, {"title", files[i].title}, {"subtitle", files[i].subtitle},
+                           {"isVideo", files[i].isVideo}, {"index", i}};
+    }
+    return out;
+}
+
+QString MediaLibrary::parentFolder(const QString &path) const { return FolderTree::parent(path); }
+QString MediaLibrary::joinFolder(const QString &path, const QString &child) const { return FolderTree::join(path, child); }
 
 int MediaLibrary::rowCount(const QModelIndex &parent) const
 {

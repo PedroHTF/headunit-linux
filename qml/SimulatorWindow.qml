@@ -65,6 +65,14 @@ Window {
                 onMoved: simVehicle.setSpeed(value)
             }
 
+            SectionTitle { text: "Volante: " + vehicle.steeringDeg.toFixed(0) + "° (trajetória da ré)" }
+            Slider {
+                Layout.fillWidth: true
+                from: -540; to: 540
+                value: vehicle.steeringDeg
+                onMoved: simVehicle.setSteering(value)
+            }
+
             SectionTitle { text: "Botões do volante" }
             GridLayout {
                 columns: 4
@@ -119,7 +127,7 @@ Window {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
                 color: Theme.textDim; font.pixelSize: Theme.fontSmall
-                text: "R ré · N próxima · B anterior · Espaço play/pause · F fonte · +/− volume · M mudo"
+                text: "R ré · ←/→ volante · N próxima · B anterior · Espaço play/pause · F fonte · +/− volume · M mudo"
             }
         }
     }
