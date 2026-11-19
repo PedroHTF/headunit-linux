@@ -6,6 +6,8 @@ Rectangle {
     property int padding: 16
     color: Theme.surfaceVariant
     radius: Theme.radius
+    border.width: Theme.borderWidth
+    border.color: Theme.outline
 
     Item {
         id: body

@@ -16,6 +16,8 @@ Rectangle {
     radius: size / 2
     opacity: enabled ? 1 : 0.35
     color: highlighted ? Theme.primary : (mouse.pressed ? Theme.surfaceHigh : Theme.surface)
+    border.width: highlighted ? 0 : Theme.borderWidth
+    border.color: Theme.outline
 
     Text {
         anchors.centerIn: parent

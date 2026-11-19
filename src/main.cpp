@@ -45,13 +45,15 @@ int main(int argc, char *argv[])
     const QCommandLineOption setupOpt(QStringLiteral("camera-setup"), QStringLiteral("Abre direto o ajuste da câmera de ré."));
     const QCommandLineOption shotOpt(QStringLiteral("screenshot"),
         QStringLiteral("Salva uma captura da tela principal em <arquivo> e sai (testes/documentação)."), QStringLiteral("arquivo"));
+    const QCommandLineOption themeOpt(QStringLiteral("theme"), QStringLiteral("Tema só nesta execução: light, dark ou auto."), QStringLiteral("tema"));
+    const QCommandLineOption hcOpt(QStringLiteral("high-contrast"), QStringLiteral("Alto contraste só nesta execução."));
     const QCommandLineOption ignOpt(QStringLiteral("ignition"), QStringLiteral("Ignição inicial do simulador (OFF, ACC, ON)."), QStringLiteral("estado"));
     const QCommandLineOption radioOpt(QStringLiteral("radio-on"), QStringLiteral("Começa com o rádio ligado (fonte Rádio)."));
     const QCommandLineOption tabOpt(QStringLiteral("media-tab"), QStringLiteral("Aba inicial da Mídia: 0 Músicas, 1 Vídeos, 2 Pastas."), QStringLiteral("n"), QStringLiteral("0"));
     const QCommandLineOption simShotOpt(QStringLiteral("screenshot-simulator"),
         QStringLiteral("Com --screenshot, salva também a janela do simulador em <arquivo>."), QStringLiteral("arquivo"));
     cli.addOptions({mediaOpt, noSimOpt, fullOpt, pageOpt, shotOpt, gearOpt, steerOpt, splashOpt, setupOpt,
-                    ignOpt, radioOpt, tabOpt, simShotOpt});
+                    ignOpt, radioOpt, tabOpt, simShotOpt, themeOpt, hcOpt});
     cli.process(app);
 
     QString mediaDir = cli.value(mediaOpt);
@@ -71,6 +73,8 @@ int main(int argc, char *argv[])
     if (cli.isSet(steerOpt)) vehicle.setSteering(cli.value(steerOpt).toDouble());
     if (cli.isSet(ignOpt)) vehicle.setIgnitionByName(cli.value(ignOpt));
     AppSettings settings;
+    if (cli.isSet(themeOpt) || cli.isSet(hcOpt))
+        settings.overrideTheme(cli.isSet(themeOpt) ? cli.value(themeOpt) : settings.themeMode(), cli.isSet(hcOpt));
     CameraSettings cameraSettings;
     LogoManager logo(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     AppController controller(&vehicle, &radio, &player, &settings);

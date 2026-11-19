@@ -51,7 +51,30 @@ Item {
 
                 Text { text: "Configurações"; color: Theme.primary; font.pixelSize: Theme.fontTitle }
 
-                Section { text: "Vídeo"; Layout.topMargin: 4 }
+                Section { text: "Aparência"; Layout.topMargin: 4 }
+                RowLayout {
+                    spacing: 8
+                    Text { text: "Tema"; color: Theme.text; font.pixelSize: Theme.fontNormal; Layout.rightMargin: 8 }
+                    Repeater {
+                        model: [["auto", "Automático"], ["light", "Claro"], ["dark", "Escuro"]]
+                        delegate: Action {
+                            required property var modelData
+                            implicitW: 130
+                            text: modelData[1]
+                            highlighted: settings.themeMode === modelData[0]
+                            onClicked: settings.themeMode = modelData[0]
+                        }
+                    }
+                }
+                Small { text: "Automático: escuro das 18h às 6h. Na central, poderá seguir o farol do carro." }
+                SettingRow {
+                    title: "Alto contraste"
+                    subtitle: "Preto e branco puros, cores de destaque fortes e bordas, para ler sob sol forte ou com baixa visão."
+                    checked: settings.highContrast
+                    onToggled: value => settings.highContrast = value
+                }
+
+                Section { text: "Vídeo" }
                 SettingRow {
                     title: "Vídeo em qualquer velocidade"
                     subtitle: "Desligado: o vídeo some acima de 5 km/h e só o áudio continua. Ligado: o vídeo " +
