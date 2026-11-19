@@ -15,7 +15,6 @@ LogoManager::LogoManager(QString dataDir, QSettings *storage, QObject *parent)
     m_storage = storage ? storage : &m_default;
     m_kind = m_storage->value(QStringLiteral("logo/kind"), m_kind).toString();
     m_ext = m_storage->value(QStringLiteral("logo/ext")).toString();
-    m_text = m_storage->value(QStringLiteral("logo/text"), m_text).toString();
     m_seconds = m_storage->value(QStringLiteral("logo/seconds"), m_seconds).toInt();
     m_onIgnition = m_storage->value(QStringLiteral("logo/onIgnition"), m_onIgnition).toBool();
     if (m_kind != u"default" && !QFile::exists(storedPath()))
@@ -77,13 +76,6 @@ void LogoManager::useDefault()
     save();
 }
 
-void LogoManager::setText(const QString &t)
-{
-    if (t == m_text) return;
-    m_text = t.left(12);
-    save();
-}
-
 void LogoManager::setSeconds(int s)
 {
     s = qBound(1, s, 8);
@@ -103,7 +95,6 @@ void LogoManager::save()
 {
     m_storage->setValue(QStringLiteral("logo/kind"), m_kind);
     m_storage->setValue(QStringLiteral("logo/ext"), m_ext);
-    m_storage->setValue(QStringLiteral("logo/text"), m_text);
     m_storage->setValue(QStringLiteral("logo/seconds"), m_seconds);
     m_storage->setValue(QStringLiteral("logo/onIgnition"), m_onIgnition);
     emit changed();

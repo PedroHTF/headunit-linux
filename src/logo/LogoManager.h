@@ -16,7 +16,6 @@ class LogoManager : public QObject
     Q_PROPERTY(QString kind READ kind NOTIFY changed)           // "default", "image", "video"
     Q_PROPERTY(QUrl fileUrl READ fileUrl NOTIFY changed)
     Q_PROPERTY(int version READ version NOTIFY changed)
-    Q_PROPERTY(QString text READ text WRITE setText NOTIFY changed)
     Q_PROPERTY(int seconds READ seconds WRITE setSeconds NOTIFY changed)
     Q_PROPERTY(bool onIgnition READ onIgnition WRITE setOnIgnition NOTIFY changed)
 
@@ -26,8 +25,6 @@ public:
     QString kind() const { return m_kind; }
     QUrl fileUrl() const;
     int version() const { return m_version; }
-    QString text() const { return m_text; }
-    void setText(const QString &t);
     int seconds() const { return m_seconds; }
     void setSeconds(int s);
     bool onIgnition() const { return m_onIgnition; }
@@ -54,7 +51,6 @@ private:
     QSettings m_default;
     QString m_kind = QStringLiteral("default");
     QString m_ext;
-    QString m_text = QStringLiteral("HR-V");
     int m_seconds = 3;
     bool m_onIgnition = true;
     int m_version = 0;

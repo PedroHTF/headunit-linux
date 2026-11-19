@@ -30,4 +30,4 @@ PENDRIVE/
 2. **Configurações → Logo de inicialização → Procurar no pendrive** e toque no arquivo.
    Ou **Escolher arquivo** para pegar de qualquer lugar.
 3. O arquivo é copiado para os dados do app: o pendrive pode sair depois.
-4. **Usar logo padrão** volta ao logo do app; o texto ("HR-V") é editável.
+4. **Usar logo padrão** volta ao logo do app ("HR-V" cromado com reflexo em terracota).

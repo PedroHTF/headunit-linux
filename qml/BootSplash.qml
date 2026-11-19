@@ -14,7 +14,7 @@ Rectangle {
         sourceComponent: logo.kind === "image" ? imageLogo : logo.kind === "video" ? videoLogo : defaultLogo
     }
 
-    Component { id: defaultLogo; DefaultLogo { text: logo.text } }
+    Component { id: defaultLogo; DefaultLogo {} }
 
     Component {
         id: imageLogo

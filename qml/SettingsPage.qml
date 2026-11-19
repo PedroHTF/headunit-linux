@@ -67,7 +67,7 @@ Item {
                     Rectangle {
                         Layout.preferredWidth: 213; Layout.preferredHeight: 120
                         radius: 12; color: "black"; clip: true
-                        DefaultLogo { anchors.fill: parent; visible: logo.kind === "default"; animate: false; text: logo.text }
+                        DefaultLogo { anchors.fill: parent; visible: logo.kind === "default"; animate: false }
                         Image { anchors.fill: parent; visible: logo.kind === "image"; source: logo.kind === "image" ? logo.fileUrl : ""; fillMode: Image.PreserveAspectFit; cache: false }
                         Text { anchors.centerIn: parent; visible: logo.kind === "video"; text: "Vídeo personalizado"; color: "white" }
                     }
@@ -111,11 +111,6 @@ Item {
                             }
                         }
                     }
-                }
-                RowLayout {
-                    visible: logo.kind === "default"
-                    Text { text: "Texto do logo padrão"; color: Theme.text; font.pixelSize: Theme.fontSmall }
-                    TextField { text: logo.text; maximumLength: 12; onTextEdited: logo.text = text; Layout.preferredWidth: 160 }
                 }
                 RowLayout {
                     Layout.fillWidth: true
