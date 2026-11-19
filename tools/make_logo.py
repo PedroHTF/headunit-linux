@@ -24,38 +24,38 @@ SLANT = math.tan(math.radians(14))
 TERRACOTTA = np.array([217, 119, 87], float)
 
 # ---------------------------------------------------------------- letras (unidade = altura)
-T = 0.22  # espessura das hastes
+T = 0.31  # espessura das hastes
 
 
 def letter_H(x):
-    w = 1.40
+    w = 1.42
     return [("rect", x, 0, x + T * 1.1, 1), ("rect", x + w - T * 1.1, 0, x + w, 1),
-            ("rect", x, 0.41, x + w, 0.61)], w
+            ("rect", x, 0.38, x + w, 0.64)], w
 
 
 def letter_R(x):
-    w = 1.30
-    shapes = [("rrect", x, 0, x + w, 0.60, 0.26, "right"),
-              ("clear_rrect", x + T * 1.1, 0.19, x + w - T, 0.42, 0.10, "right"),
+    w = 1.34
+    shapes = [("rrect", x, 0, x + w, 0.64, 0.28, "right"),
+              ("clear_rrect", x + T * 1.1, 0.23, x + w - T, 0.43, 0.09, "right"),
               ("rect", x, 0, x + T * 1.1, 1),
-              ("poly", [(x + 0.50, 0.42), (x + 0.86, 0.42), (x + 1.38, 1.0), (x + 1.00, 1.0)])]
+              ("poly", [(x + 0.46, 0.43), (x + 0.94, 0.43), (x + 1.46, 1.0), (x + 0.98, 1.0)])]
     return shapes, w
 
 
 def letter_dash(x):
-    w = 0.52
-    return [("rect", x, 0.47, x + w, 0.63)], w
+    w = 0.54
+    return [("rect", x, 0.44, x + w, 0.66)], w
 
 
 def letter_V(x):
-    w = 1.45
-    return [("poly", [(x, 0), (x + 0.30, 0), (x + 0.50, 0.70), (x + 1.17, 0), (x + 1.45, 0),
-                      (x + 0.62, 1.0), (x + 0.20, 1.0)])], w
+    w = 1.52
+    return [("poly", [(x, 0), (x + 0.42, 0), (x + 0.57, 0.60), (x + 1.10, 0), (x + 1.52, 0),
+                      (x + 0.72, 1.0), (x + 0.18, 1.0)])], w
 
 
 def layout():
     shapes, x = [], 0.0
-    for fn, gap in ((letter_H, 0.14), (letter_R, 0.10), (letter_dash, 0.10), (letter_V, 0.0)):
+    for fn, gap in ((letter_H, 0.13), (letter_R, 0.09), (letter_dash, 0.09), (letter_V, 0.0)):
         s, w = fn(x)
         shapes += s
         x += w + gap
@@ -96,7 +96,7 @@ def draw_spark(mask, cx, cy, r):
         a = math.radians(deg)
         ca, sa = math.cos(a), math.sin(a)
         inner, outer = r * 0.10, r * length
-        w = r * 0.13 * (0.85 + 0.3 * length)
+        w = r * 0.16 * (0.85 + 0.3 * length)
         left, right = [], []
         for k in range(17):
             t = k / 16
