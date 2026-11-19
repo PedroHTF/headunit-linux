@@ -5,7 +5,8 @@ import QtMultimedia
 
 Item {
     id: mediaRoot
-    property int tab: 0
+    property int tab: startMediaTab
+    Component.onCompleted: library.showVideos = tab === 1
     property string folderPath: ""
     // Reavalia quando a biblioteca muda (pendrive conectado, arquivos novos...).
     readonly property var folderEntries: { library.count; library.mounted; return library.folderEntries(folderPath) }

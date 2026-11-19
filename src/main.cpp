@@ -45,7 +45,13 @@ int main(int argc, char *argv[])
     const QCommandLineOption setupOpt(QStringLiteral("camera-setup"), QStringLiteral("Abre direto o ajuste da câmera de ré."));
     const QCommandLineOption shotOpt(QStringLiteral("screenshot"),
         QStringLiteral("Salva uma captura da tela principal em <arquivo> e sai (testes/documentação)."), QStringLiteral("arquivo"));
-    cli.addOptions({mediaOpt, noSimOpt, fullOpt, pageOpt, shotOpt, gearOpt, steerOpt, splashOpt, setupOpt});
+    const QCommandLineOption ignOpt(QStringLiteral("ignition"), QStringLiteral("Ignição inicial do simulador (OFF, ACC, ON)."), QStringLiteral("estado"));
+    const QCommandLineOption radioOpt(QStringLiteral("radio-on"), QStringLiteral("Começa com o rádio ligado (fonte Rádio)."));
+    const QCommandLineOption tabOpt(QStringLiteral("media-tab"), QStringLiteral("Aba inicial da Mídia: 0 Músicas, 1 Vídeos, 2 Pastas."), QStringLiteral("n"), QStringLiteral("0"));
+    const QCommandLineOption simShotOpt(QStringLiteral("screenshot-simulator"),
+        QStringLiteral("Com --screenshot, salva também a janela do simulador em <arquivo>."), QStringLiteral("arquivo"));
+    cli.addOptions({mediaOpt, noSimOpt, fullOpt, pageOpt, shotOpt, gearOpt, steerOpt, splashOpt, setupOpt,
+                    ignOpt, radioOpt, tabOpt, simShotOpt});
     cli.process(app);
 
     QString mediaDir = cli.value(mediaOpt);
@@ -63,11 +69,17 @@ int main(int argc, char *argv[])
     MediaPlayerController player(&library);
     if (cli.isSet(gearOpt)) vehicle.setGearByName(cli.value(gearOpt));
     if (cli.isSet(steerOpt)) vehicle.setSteering(cli.value(steerOpt).toDouble());
+    if (cli.isSet(ignOpt)) vehicle.setIgnitionByName(cli.value(ignOpt));
     AppSettings settings;
     CameraSettings cameraSettings;
     LogoManager logo(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     AppController controller(&vehicle, &radio, &player, &settings);
     PerfMonitor perf(sinceStart);
+    if (cli.isSet(radioOpt)) {
+        controller.onRadioStarted();
+        radio.tune(94700);
+        radio.powerOn();
+    }
 
     QQuickStyle::setStyle(QStringLiteral("Basic"));
     qmlRegisterType<ReverseCameraItem>("HeadUnit.Camera", 1, 0, "ReverseCamera");
@@ -90,6 +102,7 @@ int main(int argc, char *argv[])
     ctx->setContextProperty(QStringLiteral("showSimulator"), !cli.isSet(noSimOpt));
     ctx->setContextProperty(QStringLiteral("startFullscreen"), cli.isSet(fullOpt));
     ctx->setContextProperty(QStringLiteral("startPage"), cli.value(pageOpt).toInt());
+    ctx->setContextProperty(QStringLiteral("startMediaTab"), cli.value(tabOpt).toInt());
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
                      [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);
@@ -102,7 +115,14 @@ int main(int argc, char *argv[])
 
     if (cli.isSet(shotOpt) && window) {
         const QString file = cli.value(shotOpt);
-        QTimer::singleShot(1500, window, [window, file] {
+        const QString simFile = cli.value(simShotOpt);
+        QTimer::singleShot(1500, window, [window, file, simFile] {
+            if (!simFile.isEmpty()) {
+                for (QWindow *w : QGuiApplication::topLevelWindows()) {
+                    auto *qw = qobject_cast<QQuickWindow *>(w);
+                    if (qw && qw != window && qw->title() == u"Simulador") qw->grabWindow().save(simFile);
+                }
+            }
             const bool ok = window->grabWindow().save(file);
             qInfo().noquote() << (ok ? "Captura salva em" : "Falha ao salvar") << file;
             QCoreApplication::exit(ok ? 0 : 1);
