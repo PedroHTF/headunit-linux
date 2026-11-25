@@ -3,6 +3,8 @@
 #include "camera/CameraSettings.h"
 #include "camera/ReverseCameraItem.h"
 #include "logo/LogoManager.h"
+#include "audio/Equalizer.h"
+#include "hal/SimulatedPhoneHal.h"
 #include "hal/SimulatedRadioHal.h"
 #include "hal/SimulatedVehicleHal.h"
 #include "media/MediaLibrary.h"
@@ -38,7 +40,7 @@ int main(int argc, char *argv[])
     const QCommandLineOption noSimOpt(QStringLiteral("no-simulator"), QStringLiteral("Não abre a janela do simulador."));
     const QCommandLineOption fullOpt(QStringLiteral("fullscreen"), QStringLiteral("Tela cheia (como na central)."));
     const QCommandLineOption pageOpt(QStringLiteral("page"),
-        QStringLiteral("Tela inicial: 0 Início, 1 Mídia, 2 Rádio, 3 Veículo, 4 Projeção, 5 Configurações."), QStringLiteral("n"), QStringLiteral("0"));
+        QStringLiteral("Tela inicial: 0 Início, 1 Mídia, 2 Rádio, 3 Telefone, 4 Veículo, 5 Projeção, 6 Configurações."), QStringLiteral("n"), QStringLiteral("0"));
     const QCommandLineOption gearOpt(QStringLiteral("gear"), QStringLiteral("Marcha inicial do simulador (P, R, N, D)."), QStringLiteral("marcha"));
     const QCommandLineOption steerOpt(QStringLiteral("steering"), QStringLiteral("Ângulo inicial do volante no simulador."), QStringLiteral("graus"));
     const QCommandLineOption splashOpt(QStringLiteral("splash"), QStringLiteral("Mostra o logo mesmo com --screenshot."));
@@ -47,13 +49,15 @@ int main(int argc, char *argv[])
         QStringLiteral("Salva uma captura da tela principal em <arquivo> e sai (testes/documentação)."), QStringLiteral("arquivo"));
     const QCommandLineOption themeOpt(QStringLiteral("theme"), QStringLiteral("Tema só nesta execução: light, dark ou auto."), QStringLiteral("tema"));
     const QCommandLineOption hcOpt(QStringLiteral("high-contrast"), QStringLiteral("Alto contraste só nesta execução."));
+    const QCommandLineOption eqOpt(QStringLiteral("equalizer"), QStringLiteral("Abre direto o equalizador."));
+    const QCommandLineOption callOpt(QStringLiteral("call"), QStringLiteral("Simula uma ligação: incoming ou active."), QStringLiteral("estado"));
     const QCommandLineOption ignOpt(QStringLiteral("ignition"), QStringLiteral("Ignição inicial do simulador (OFF, ACC, ON)."), QStringLiteral("estado"));
     const QCommandLineOption radioOpt(QStringLiteral("radio-on"), QStringLiteral("Começa com o rádio ligado (fonte Rádio)."));
     const QCommandLineOption tabOpt(QStringLiteral("media-tab"), QStringLiteral("Aba inicial da Mídia: 0 Músicas, 1 Vídeos, 2 Pastas."), QStringLiteral("n"), QStringLiteral("0"));
     const QCommandLineOption simShotOpt(QStringLiteral("screenshot-simulator"),
         QStringLiteral("Com --screenshot, salva também a janela do simulador em <arquivo>."), QStringLiteral("arquivo"));
     cli.addOptions({mediaOpt, noSimOpt, fullOpt, pageOpt, shotOpt, gearOpt, steerOpt, splashOpt, setupOpt,
-                    ignOpt, radioOpt, tabOpt, simShotOpt, themeOpt, hcOpt});
+                    ignOpt, radioOpt, tabOpt, simShotOpt, themeOpt, hcOpt, eqOpt, callOpt});
     cli.process(app);
 
     QString mediaDir = cli.value(mediaOpt);
@@ -72,13 +76,19 @@ int main(int argc, char *argv[])
     if (cli.isSet(gearOpt)) vehicle.setGearByName(cli.value(gearOpt));
     if (cli.isSet(steerOpt)) vehicle.setSteering(cli.value(steerOpt).toDouble());
     if (cli.isSet(ignOpt)) vehicle.setIgnitionByName(cli.value(ignOpt));
+    SimulatedPhoneHal phone;
+    Equalizer equalizer;
     AppSettings settings;
     if (cli.isSet(themeOpt) || cli.isSet(hcOpt))
         settings.overrideTheme(cli.isSet(themeOpt) ? cli.value(themeOpt) : settings.themeMode(), cli.isSet(hcOpt));
     CameraSettings cameraSettings;
     LogoManager logo(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
-    AppController controller(&vehicle, &radio, &player, &settings);
+    AppController controller(&vehicle, &radio, &player, &settings, &phone);
     PerfMonitor perf(sinceStart);
+    if (cli.isSet(callOpt)) {
+        phone.simulateIncoming(QStringLiteral("+55 11 98765-4321"));
+        if (cli.value(callOpt) == u"active") phone.accept();
+    }
     if (cli.isSet(radioOpt)) {
         controller.onRadioStarted();
         radio.tune(94700);
@@ -98,6 +108,10 @@ int main(int argc, char *argv[])
     ctx->setContextProperty(QStringLiteral("app"), &controller);
     ctx->setContextProperty(QStringLiteral("perf"), &perf);
     ctx->setContextProperty(QStringLiteral("settings"), &settings);
+    ctx->setContextProperty(QStringLiteral("phone"), &phone);
+    ctx->setContextProperty(QStringLiteral("simPhone"), &phone);
+    ctx->setContextProperty(QStringLiteral("equalizer"), &equalizer);
+    ctx->setContextProperty(QStringLiteral("startEqualizer"), cli.isSet(eqOpt));
     ctx->setContextProperty(QStringLiteral("cameraSettings"), &cameraSettings);
     ctx->setContextProperty(QStringLiteral("logo"), &logo);
     // Numa captura de tela o logo atrapalharia; --splash força.

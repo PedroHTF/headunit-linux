@@ -69,8 +69,8 @@ Item {
                 model: [
                     { label: "Mídia", glyph: "♫", page: 1 },
                     { label: "Rádio", glyph: "≋", page: 2 },
-                    { label: "Veículo", glyph: "◈", page: 3 },
-                    { label: "Projeção", glyph: "⧉", page: 4 }
+                    { label: "Telefone", glyph: "✆", page: 3 },
+                    { label: "Projeção", glyph: "⧉", page: 5 }
                 ]
                 delegate: Rectangle {
                     required property var modelData

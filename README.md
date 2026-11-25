@@ -32,7 +32,8 @@ com o hardware do carro simulado.
 | Botões do volante (próxima, anterior, play, volume, mudo, fonte) | ✅ simulador e teclado |
 | Métricas: tempo até o 1º quadro, FPS, memória | ✅ |
 | CarPlay / Android Auto | ⏳ planejado via dongle USB |
-| Bluetooth (chamadas, música) | ⏳ planejado (BlueZ + oFono/PipeWire) |
+| **Telefone** (agenda, recentes, teclado, chamada recebida/ativa, botão do volante) | 🟡 simulado; real via oFono/BlueZ (HFP) e obexd (PBAP) |
+| **Equalizador** 10 bandas, predefinições, balanço, fader, loudness | 🟡 salvo e exibido; o som será processado pelo DSP da central |
 
 ## Rodar no Windows
 
@@ -54,7 +55,9 @@ Coloque músicas/vídeos na pasta `HeadUnitUSB` dentro da sua pasta de usuário
 headunit --media D:\Musicas     pasta que simula o pendrive
 headunit --fullscreen           tela cheia, como na central
 headunit --no-simulator         sem a janela do simulador
-headunit --page 2               abre direto numa tela (0 Início ... 5 Configurações)
+headunit --page 3               abre direto numa tela (0 Início, 1 Mídia, 2 Rádio, 3 Telefone, 4 Veículo, 5 Projeção, 6 Configurações)
+headunit --call incoming        simula uma ligação chegando (ou --call active)
+headunit --equalizer            abre direto o equalizador
 headunit --screenshot tela.png  salva uma captura e sai (sem o logo; --splash para incluí-lo)
 headunit --gear R --steering 200   começa de ré com o volante virado
 headunit --camera-setup         abre direto o ajuste da câmera de ré
@@ -62,7 +65,7 @@ headunit --camera-setup         abre direto o ajuste da câmera de ré
 
 ### Atalhos de teclado (janela principal)
 
-`R` ré · `←`/`→` volante · `N` próxima · `B` anterior · `Espaço` play/pause · `F` fonte (mídia/rádio) ·
+`R` ré · `←`/`→` volante · `T` telefone (atende/desliga) · `N` próxima · `B` anterior · `Espaço` play/pause · `F` fonte (mídia/rádio) ·
 `+`/`-` volume · `M` mudo
 
 ## Arquitetura

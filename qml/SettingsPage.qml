@@ -7,6 +7,7 @@ Item {
     id: page
     signal openCameraSetup()
     signal previewLogo()
+    signal openEqualizer()
 
     property var logoCandidates: null
     property string logoMessage: ""
@@ -72,6 +73,14 @@ Item {
                     subtitle: "Preto e branco puros, cores de destaque fortes e bordas, para ler sob sol forte ou com baixa visão."
                     checked: settings.highContrast
                     onToggled: value => settings.highContrast = value
+                }
+
+                Section { text: "Áudio" }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 16
+                    Small { text: "Equalizador de 10 bandas, balanço, fader e loudness. Atual: " + equalizer.preset + "." }
+                    Action { implicitW: 170; text: "Equalizador"; highlighted: true; onClicked: page.openEqualizer() }
                 }
 
                 Section { text: "Vídeo" }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "app/AppSettings.h"
+#include "hal/PhoneHal.h"
 #include "hal/RadioHal.h"
 #include "hal/VehicleHal.h"
 #include "media/MediaPlayerController.h"
@@ -20,7 +21,7 @@ class AppController : public QObject
 
 public:
     AppController(VehicleHal *vehicle, RadioHal *radio, MediaPlayerController *player,
-                  AppSettings *settings, QObject *parent = nullptr);
+                  AppSettings *settings, PhoneHal *phone = nullptr, QObject *parent = nullptr);
 
     /** "none", "media" ou "radio". */
     QString audioSource() const { return m_source; }
@@ -39,11 +40,17 @@ signals:
 private:
     void setSource(const QString &s);
     void onVehicleChanged();
+    void onPhoneChanged();
 
     VehicleHal *m_vehicle;
     RadioHal *m_radio;
     MediaPlayerController *m_player;
     AppSettings *m_settings;
+    PhoneHal *m_phone;
+    // O que estava tocando antes da ligação, para retomar depois.
+    bool m_inCall = false;
+    bool m_resumeMedia = false;
+    bool m_resumeRadio = false;
     QString m_source = QStringLiteral("none");
     bool m_wasPowered = true;
 };

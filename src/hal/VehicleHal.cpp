@@ -65,6 +65,7 @@ static const QHash<QString, VehicleHal::Key> &keyNames()
         {QStringLiteral("volup"), VehicleHal::Key::VolumeUp},
         {QStringLiteral("mute"), VehicleHal::Key::Mute},
         {QStringLiteral("mode"), VehicleHal::Key::Mode},
+        {QStringLiteral("phone"), VehicleHal::Key::Phone},
     };
     return names;
 }

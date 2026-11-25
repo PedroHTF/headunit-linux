@@ -7,6 +7,7 @@ Rectangle {
         { label: "Início", glyph: "⌂" },
         { label: "Mídia", glyph: "♫" },
         { label: "Rádio", glyph: "≋" },
+        { label: "Telefone", glyph: "✆" },
         { label: "Veículo", glyph: "◈" },
         { label: "Projeção", glyph: "⧉" },
         { label: "Config.", glyph: "⚙" }

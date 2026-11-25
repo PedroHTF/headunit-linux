@@ -80,7 +80,7 @@ Window {
                 rowSpacing: 8
                 Repeater {
                     model: [["previous", "|◀"], ["playpause", "▶❚❚"], ["next", "▶|"], ["mode", "Fonte"],
-                            ["voldown", "Vol−"], ["volup", "Vol+"], ["mute", "Mudo"]]
+                            ["voldown", "Vol−"], ["volup", "Vol+"], ["mute", "Mudo"], ["phone", "✆"]]
                     delegate: Choice {
                         required property var modelData
                         width: 80
@@ -88,6 +88,18 @@ Window {
                         onClicked: simVehicle.pressKey(modelData[0])
                     }
                 }
+            }
+
+            SectionTitle { text: "Telefone (Bluetooth)" }
+            RowLayout {
+                Layout.fillWidth: true
+                Switch { checked: phone.connected; onToggled: simPhone.setConnected(checked) }
+                Text { text: phone.connected ? "Celular conectado" : "Desconectado"; color: Theme.text; font.pixelSize: Theme.fontNormal }
+            }
+            Row {
+                spacing: 8
+                Choice { width: 150; text: "Receber ligação"; enabled: phone.connected && phone.callState === "idle"; onClicked: simPhone.simulateIncoming("+55 11 98765-4321") }
+                Choice { width: 150; text: "Outro lado desliga"; enabled: phone.callState !== "idle"; onClicked: simPhone.simulateRemoteHangup() }
             }
 
             SectionTitle { text: "Pendrive USB" }
@@ -127,7 +139,7 @@ Window {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
                 color: Theme.textDim; font.pixelSize: Theme.fontSmall
-                text: "R ré · ←/→ volante · N próxima · B anterior · Espaço play/pause · F fonte · +/− volume · M mudo"
+                text: "R ré · ←/→ volante · T telefone · N próxima · B anterior · Espaço play/pause · F fonte · +/− volume · M mudo"
             }
         }
     }

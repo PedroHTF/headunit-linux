@@ -27,7 +27,7 @@ public:
     Q_ENUM(Gear)
     enum class Ignition { Off, Acc, On, Start, Unknown };
     Q_ENUM(Ignition)
-    enum class Key { Previous, PlayPause, Next, VolumeDown, VolumeUp, Mute, Mode };
+    enum class Key { Previous, PlayPause, Next, VolumeDown, VolumeUp, Mute, Mode, Phone };
     Q_ENUM(Key)
 
     using QObject::QObject;

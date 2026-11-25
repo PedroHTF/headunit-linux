@@ -20,6 +20,7 @@ Window {
     Shortcut { sequence: "M"; onActivated: app.pressKey("mute") }
     Shortcut { sequence: "F"; onActivated: app.pressKey("mode") }
     Shortcut { sequence: "R"; enabled: !!simVehicle; onActivated: simVehicle.setGearByName(vehicle.gearLabel === "R" ? "P" : "R") }
+    Shortcut { sequence: "T"; onActivated: app.pressKey("phone") }
     Shortcut { sequence: "Left"; enabled: !!simVehicle; onActivated: simVehicle.setSteering(vehicle.steeringDeg - 45) }
     Shortcut { sequence: "Right"; enabled: !!simVehicle; onActivated: simVehicle.setSteering(vehicle.steeringDeg + 45) }
 
@@ -27,6 +28,7 @@ Window {
     property bool splash: showSplashOnStart
     property bool wasPowered: vehicle.powered
     property bool cameraSetupOpen: startCameraSetup
+    property bool equalizerOpen: startEqualizer
     Connections {
         target: vehicle
         function onStateChanged() {
@@ -63,10 +65,12 @@ Window {
                 HomePage { onNavigate: index => nav.currentIndex = index }
                 MediaPage {}
                 RadioPage {}
+                PhonePage {}
                 VehiclePage {}
                 ProjectionPage {}
                 SettingsPage {
                     onOpenCameraSetup: root.cameraSetupOpen = true
+                    onOpenEqualizer: root.equalizerOpen = true
                     onPreviewLogo: root.splash = true
                 }
             }
@@ -77,6 +81,19 @@ Window {
         anchors.fill: parent
         active: app.showReverseCamera && !root.cameraSetupOpen
         sourceComponent: ReverseCameraOverlay {}
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: root.equalizerOpen
+        sourceComponent: EqualizerPage { onClosed: root.equalizerOpen = false }
+    }
+
+    // Ligação: por cima das telas, abaixo da câmera de ré.
+    Loader {
+        anchors.fill: parent
+        active: phone.callState !== "idle" && !app.showReverseCamera
+        sourceComponent: CallOverlay {}
     }
 
     Loader {

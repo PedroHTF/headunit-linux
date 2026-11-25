@@ -23,6 +23,9 @@ qt_add_library(headunit_core STATIC
     src/hal/SimulatedVehicleHal.h src/hal/SimulatedVehicleHal.cpp
     src/hal/RadioHal.h src/hal/RadioHal.cpp
     src/hal/SimulatedRadioHal.h src/hal/SimulatedRadioHal.cpp
+    src/hal/PhoneHal.h src/hal/PhoneHal.cpp
+    src/hal/SimulatedPhoneHal.h src/hal/SimulatedPhoneHal.cpp
+    src/audio/Equalizer.h src/audio/Equalizer.cpp
     src/media/MediaLibrary.h src/media/MediaLibrary.cpp
     src/media/MediaPlayerController.h src/media/MediaPlayerController.cpp
     src/app/AppController.h src/app/AppController.cpp
@@ -58,6 +61,9 @@ set(QML_FILES
     qml/VehiclePage.qml
     qml/ProjectionPage.qml
     qml/SettingsPage.qml
+    qml/PhonePage.qml
+    qml/CallOverlay.qml
+    qml/EqualizerPage.qml
     qml/CameraSetupPage.qml
     qml/BootSplash.qml
     qml/DefaultLogo.qml
@@ -85,7 +91,7 @@ target_link_libraries(headunit PRIVATE headunit_core Qt6::Quick Qt6::QuickContro
 # ---- Testes ---------------------------------------------------------------------
 if(TARGET Qt6::Test)
     enable_testing()
-    foreach(t tst_radio tst_driving_rules tst_media_library tst_camera tst_logo_folders)
+    foreach(t tst_radio tst_driving_rules tst_media_library tst_camera tst_logo_folders tst_phone_eq)
         qt_add_executable(${t} tests/${t}.cpp)
         target_link_libraries(${t} PRIVATE headunit_core Qt6::Test)
         add_test(NAME ${t} COMMAND ${t})

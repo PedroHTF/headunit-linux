@@ -21,6 +21,6 @@ public:
     Q_INVOKABLE void setGearByName(const QString &name);
     Q_INVOKABLE void setSpeed(double kmh);
     Q_INVOKABLE void setSteering(double deg);
-    /** "previous", "playpause", "next", "voldown", "volup", "mute", "mode". */
+    /** "previous", "playpause", "next", "voldown", "volup", "mute", "mode", "phone". */
     Q_INVOKABLE void pressKey(const QString &key);
 };

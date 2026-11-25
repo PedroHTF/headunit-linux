@@ -3,9 +3,10 @@
 #include "hal/DrivingRules.h"
 
 AppController::AppController(VehicleHal *vehicle, RadioHal *radio, MediaPlayerController *player,
-                             AppSettings *settings, QObject *parent)
-    : QObject(parent), m_vehicle(vehicle), m_radio(radio), m_player(player), m_settings(settings)
+                             AppSettings *settings, PhoneHal *phone, QObject *parent)
+    : QObject(parent), m_vehicle(vehicle), m_radio(radio), m_player(player), m_settings(settings), m_phone(phone)
 {
+    if (m_phone) connect(m_phone, &PhoneHal::changed, this, &AppController::onPhoneChanged);
     connect(m_settings, &AppSettings::changed, this, &AppController::drivingStateChanged);
     connect(m_vehicle, &VehicleHal::steeringKey, this, &AppController::handleKey);
     connect(m_vehicle, &VehicleHal::stateChanged, this, &AppController::onVehicleChanged);
@@ -32,6 +33,23 @@ void AppController::onVehicleChanged()
     }
     m_wasPowered = powered;
     emit drivingStateChanged();
+}
+
+void AppController::onPhoneChanged()
+{
+    const bool inCall = m_phone->inCall();
+    if (inCall == m_inCall) return;
+    m_inCall = inCall;
+    if (inCall) { // ligação: silencia mídia e rádio
+        m_resumeMedia = m_player->isPlaying();
+        m_resumeRadio = m_radio->isOn();
+        m_player->pause();
+        m_radio->powerOff();
+    } else { // fim da ligação: volta ao que estava tocando
+        if (m_resumeMedia) m_player->togglePlayPause();
+        if (m_resumeRadio) m_radio->powerOn();
+        m_resumeMedia = m_resumeRadio = false;
+    }
 }
 
 void AppController::onRadioStarted()
@@ -71,6 +89,11 @@ void AppController::handleKey(VehicleHal::Key key)
         break;
     case VehicleHal::Key::Mute:
         m_player->setMuted(!m_player->isMuted());
+        break;
+    case VehicleHal::Key::Phone: // atende, ou desliga
+        if (!m_phone) break;
+        if (m_phone->callState() == u"incoming") m_phone->accept();
+        else if (m_phone->inCall()) m_phone->hangup();
         break;
     case VehicleHal::Key::Mode:
         if (radio) {
