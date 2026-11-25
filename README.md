@@ -31,7 +31,7 @@ com o hardware do carro simulado.
 | Tela apagada e áudio parado com ACC desligado | ✅ |
 | Botões do volante (próxima, anterior, play, volume, mudo, fonte) | ✅ simulador e teclado |
 | Métricas: tempo até o 1º quadro, FPS, memória | ✅ |
-| CarPlay / Android Auto | ⏳ planejado via dongle USB |
+| **CarPlay / Android Auto** pelo dongle USB (Carlinkit) | ✅ simulado · 🟡 dongle real implementado, ainda não testado ([detalhes](docs/dongle.md)) |
 | **Telefone** (agenda, recentes, teclado, chamada recebida/ativa, botão do volante) | 🟡 simulado; real via oFono/BlueZ (HFP) e obexd (PBAP) |
 | **Equalizador** 10 bandas, predefinições, balanço, fader, loudness | 🟡 salvo e exibido; o som será processado pelo DSP da central |
 
@@ -58,6 +58,8 @@ headunit --no-simulator         sem a janela do simulador
 headunit --page 3               abre direto numa tela (0 Início, 1 Mídia, 2 Rádio, 3 Telefone, 4 Veículo, 5 Projeção, 6 Configurações)
 headunit --call incoming        simula uma ligação chegando (ou --call active)
 headunit --equalizer            abre direto o equalizador
+headunit --dongle usb           usa o dongle CarPlay/Android Auto real (padrão: simulado)
+headunit --projection carplay   dongle simulado já com um iPhone conectado (ou androidauto)
 headunit --screenshot tela.png  salva uma captura e sai (sem o logo; --splash para incluí-lo)
 headunit --gear R --steering 200   começa de ré com o volante virado
 headunit --camera-setup         abre direto o ajuste da câmera de ré
@@ -82,6 +84,9 @@ src/perf/             PerfMonitor: 1º quadro, FPS, memória
 src/camera/           Câmera de ré: geometria em C++ puro (lente/fisheye, linhas, trajetória,
                       cena simulada), CameraSettings e o item QML ReverseCamera
 src/logo/             LogoManager: logo padrão ou arquivo do pendrive
+src/projection/       Dongle CarPlay/AA: protocolo, transporte USB (libusb) e simulado,
+                      vídeo H.264 (FFmpeg), áudio, ProjectionController e ProjectionView
+src/audio/            Equalizer (10 bandas)
 tests/                Testes (Qt Test): rádio, regras/controle, biblioteca de mídia
 ```
 

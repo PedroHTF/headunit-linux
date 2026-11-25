@@ -5,6 +5,8 @@
 #include "logo/LogoManager.h"
 #include "audio/Equalizer.h"
 #include "hal/SimulatedPhoneHal.h"
+#include "projection/ProjectionController.h"
+#include "projection/ProjectionView.h"
 #include "hal/SimulatedRadioHal.h"
 #include "hal/SimulatedVehicleHal.h"
 #include "media/MediaLibrary.h"
@@ -49,6 +51,10 @@ int main(int argc, char *argv[])
         QStringLiteral("Salva uma captura da tela principal em <arquivo> e sai (testes/documentação)."), QStringLiteral("arquivo"));
     const QCommandLineOption themeOpt(QStringLiteral("theme"), QStringLiteral("Tema só nesta execução: light, dark ou auto."), QStringLiteral("tema"));
     const QCommandLineOption hcOpt(QStringLiteral("high-contrast"), QStringLiteral("Alto contraste só nesta execução."));
+    const QCommandLineOption dongleOpt(QStringLiteral("dongle"),
+        QStringLiteral("Dongle CarPlay/Android Auto: sim (padrão no PC) ou usb (dongle real)."), QStringLiteral("tipo"), QStringLiteral("sim"));
+    const QCommandLineOption projOpt(QStringLiteral("projection"),
+        QStringLiteral("Dongle simulado: conecta um celular (carplay ou androidauto)."), QStringLiteral("tipo"));
     const QCommandLineOption eqOpt(QStringLiteral("equalizer"), QStringLiteral("Abre direto o equalizador."));
     const QCommandLineOption callOpt(QStringLiteral("call"), QStringLiteral("Simula uma ligação: incoming ou active."), QStringLiteral("estado"));
     const QCommandLineOption ignOpt(QStringLiteral("ignition"), QStringLiteral("Ignição inicial do simulador (OFF, ACC, ON)."), QStringLiteral("estado"));
@@ -57,7 +63,8 @@ int main(int argc, char *argv[])
     const QCommandLineOption simShotOpt(QStringLiteral("screenshot-simulator"),
         QStringLiteral("Com --screenshot, salva também a janela do simulador em <arquivo>."), QStringLiteral("arquivo"));
     cli.addOptions({mediaOpt, noSimOpt, fullOpt, pageOpt, shotOpt, gearOpt, steerOpt, splashOpt, setupOpt,
-                    ignOpt, radioOpt, tabOpt, simShotOpt, themeOpt, hcOpt, eqOpt, callOpt});
+                    ignOpt, radioOpt, tabOpt, simShotOpt, themeOpt, hcOpt, eqOpt, callOpt,
+                    dongleOpt, projOpt});
     cli.process(app);
 
     QString mediaDir = cli.value(mediaOpt);
@@ -84,6 +91,12 @@ int main(int argc, char *argv[])
     CameraSettings cameraSettings;
     LogoManager logo(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
     AppController controller(&vehicle, &radio, &player, &settings, &phone);
+    ProjectionController projection(cli.value(dongleOpt) != u"usb");
+    projection.setVideoSize(864, 560); // área da tela Projeção em 1024x600
+    controller.setProjection(&projection);
+    projection.start();
+    if (cli.isSet(projOpt))
+        QTimer::singleShot(400, &projection, [&projection, t = cli.value(projOpt)] { projection.simulatePhone(t); });
     PerfMonitor perf(sinceStart);
     if (cli.isSet(callOpt)) {
         phone.simulateIncoming(QStringLiteral("+55 11 98765-4321"));
@@ -96,6 +109,8 @@ int main(int argc, char *argv[])
     }
 
     QQuickStyle::setStyle(QStringLiteral("Basic"));
+    qmlRegisterType<ProjectionView>("HeadUnit.Projection", 1, 0, "ProjectionView");
+    qmlRegisterUncreatableType<ProjectionController>("HeadUnit.Projection", 1, 0, "ProjectionController", QStringLiteral("Use projection"));
     qmlRegisterType<ReverseCameraItem>("HeadUnit.Camera", 1, 0, "ReverseCamera");
     qmlRegisterUncreatableType<CameraSettings>("HeadUnit.Camera", 1, 0, "CameraSettings", QStringLiteral("Use cameraSettings"));
     QQmlApplicationEngine engine;
@@ -111,6 +126,7 @@ int main(int argc, char *argv[])
     ctx->setContextProperty(QStringLiteral("phone"), &phone);
     ctx->setContextProperty(QStringLiteral("simPhone"), &phone);
     ctx->setContextProperty(QStringLiteral("equalizer"), &equalizer);
+    ctx->setContextProperty(QStringLiteral("projection"), &projection);
     ctx->setContextProperty(QStringLiteral("startEqualizer"), cli.isSet(eqOpt));
     ctx->setContextProperty(QStringLiteral("cameraSettings"), &cameraSettings);
     ctx->setContextProperty(QStringLiteral("logo"), &logo);

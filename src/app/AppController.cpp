@@ -52,6 +52,19 @@ void AppController::onPhoneChanged()
     }
 }
 
+void AppController::setProjection(ProjectionController *projection)
+{
+    m_projection = projection;
+    connect(projection, &ProjectionController::mediaAudioStarted, this, [this] {
+        m_player->pause();
+        m_radio->powerOff();
+        setSource(QStringLiteral("projection"));
+    });
+    connect(projection, &ProjectionController::stateChanged, this, [this] {
+        if (!m_projection->isConnected() && m_source == u"projection") setSource(QStringLiteral("none"));
+    });
+}
+
 void AppController::onRadioStarted()
 {
     m_player->pause();
@@ -67,6 +80,14 @@ void AppController::pressKey(const QString &key)
 
 void AppController::handleKey(VehicleHal::Key key)
 {
+    if (m_projection && m_projection->isConnected() && m_source == u"projection") {
+        switch (key) {
+        case VehicleHal::Key::Next: m_projection->key(QStringLiteral("next")); return;
+        case VehicleHal::Key::Previous: m_projection->key(QStringLiteral("prev")); return;
+        case VehicleHal::Key::PlayPause: m_projection->key(QStringLiteral("playpause")); return;
+        default: break;
+        }
+    }
     const bool radio = m_source == u"radio";
     switch (key) {
     case VehicleHal::Key::Next:

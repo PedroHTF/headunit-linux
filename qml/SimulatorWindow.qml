@@ -102,6 +102,23 @@ Window {
                 Choice { width: 150; text: "Outro lado desliga"; enabled: phone.callState !== "idle"; onClicked: simPhone.simulateRemoteHangup() }
             }
 
+            SectionTitle { text: "Dongle CarPlay / Android Auto" }
+            RowLayout {
+                Layout.fillWidth: true
+                Switch { checked: projection.simulated; enabled: projection.usbAvailable; onToggled: projection.setSimulated(checked) }
+                Text {
+                    text: projection.simulated ? "Dongle simulado" : "Dongle USB real"
+                    color: Theme.text; font.pixelSize: Theme.fontNormal
+                }
+            }
+            Row {
+                spacing: 8
+                visible: projection.simulated
+                Choice { width: 110; text: "iPhone"; highlighted: projection.phoneType === "CarPlay"; onClicked: projection.simulatePhone("carplay") }
+                Choice { width: 110; text: "Android"; highlighted: projection.phoneType === "Android Auto"; onClicked: projection.simulatePhone("androidauto") }
+                Choice { width: 110; text: "Desconectar"; enabled: projection.state === "connected"; onClicked: projection.simulatePhone("") }
+            }
+
             SectionTitle { text: "Pendrive USB" }
             RowLayout {
                 Layout.fillWidth: true

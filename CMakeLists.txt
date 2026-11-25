@@ -39,7 +39,35 @@ qt_add_library(headunit_core STATIC
     src/camera/ReverseCameraItem.h src/camera/ReverseCameraItem.cpp
     src/logo/LogoManager.h src/logo/LogoManager.cpp
     src/media/FolderTree.h
+    src/projection/DongleProtocol.h src/projection/DongleProtocol.cpp
+    src/projection/DongleTransport.h
+    src/projection/SimulatedDongleTransport.h src/projection/SimulatedDongleTransport.cpp
+    src/projection/H264Decoder.h src/projection/H264Decoder.cpp
+    src/projection/ProjectionController.h src/projection/ProjectionController.cpp
+    src/projection/ProjectionView.h src/projection/ProjectionView.cpp
 )
+
+# ---- Dongle CarPlay/Android Auto: USB real (libusb) e vídeo (FFmpeg), se houver --------
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+    pkg_check_modules(LIBUSB IMPORTED_TARGET libusb-1.0)
+    pkg_check_modules(FFMPEG IMPORTED_TARGET libavcodec libavutil libswscale)
+endif()
+if(LIBUSB_FOUND)
+    target_sources(headunit_core PRIVATE src/projection/UsbDongleTransport.h src/projection/UsbDongleTransport.cpp)
+    target_compile_definitions(headunit_core PUBLIC HEADUNIT_HAVE_LIBUSB)
+    target_link_libraries(headunit_core PUBLIC PkgConfig::LIBUSB)
+    message(STATUS "Dongle USB: libusb encontrada")
+else()
+    message(STATUS "Dongle USB: sem libusb (só dongle simulado)")
+endif()
+if(FFMPEG_FOUND)
+    target_compile_definitions(headunit_core PUBLIC HEADUNIT_HAVE_FFMPEG)
+    target_link_libraries(headunit_core PUBLIC PkgConfig::FFMPEG)
+    message(STATUS "Vídeo H.264: FFmpeg encontrado")
+else()
+    message(STATUS "Vídeo H.264: sem FFmpeg (vídeo do dongle real não será decodificado)")
+endif()
 target_include_directories(headunit_core PUBLIC src)
 target_link_libraries(headunit_core PUBLIC Qt6::Core Qt6::Gui Qt6::Quick Qt6::Multimedia)
 if(WIN32)
@@ -91,7 +119,7 @@ target_link_libraries(headunit PRIVATE headunit_core Qt6::Quick Qt6::QuickContro
 # ---- Testes ---------------------------------------------------------------------
 if(TARGET Qt6::Test)
     enable_testing()
-    foreach(t tst_radio tst_driving_rules tst_media_library tst_camera tst_logo_folders tst_phone_eq)
+    foreach(t tst_radio tst_driving_rules tst_media_library tst_camera tst_logo_folders tst_phone_eq tst_dongle)
         qt_add_executable(${t} tests/${t}.cpp)
         target_link_libraries(${t} PRIVATE headunit_core Qt6::Test)
         add_test(NAME ${t} COMMAND ${t})

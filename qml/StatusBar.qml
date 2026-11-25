@@ -10,7 +10,7 @@ Rectangle {
         onTriggered: parent.clock = Qt.formatTime(new Date(), "HH:mm")
     }
 
-    readonly property var sourceNames: ({ none: "—", media: "Mídia", radio: "Rádio" })
+    readonly property var sourceNames: ({ none: "—", media: "Mídia", radio: "Rádio", projection: "Celular" })
 
     RowLayout {
         anchors.fill: parent

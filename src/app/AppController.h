@@ -5,6 +5,7 @@
 #include "hal/RadioHal.h"
 #include "hal/VehicleHal.h"
 #include "media/MediaPlayerController.h"
+#include "projection/ProjectionController.h"
 
 #include <QObject>
 
@@ -23,7 +24,7 @@ public:
     AppController(VehicleHal *vehicle, RadioHal *radio, MediaPlayerController *player,
                   AppSettings *settings, PhoneHal *phone = nullptr, QObject *parent = nullptr);
 
-    /** "none", "media" ou "radio". */
+    /** "none", "media", "radio" ou "projection". */
     QString audioSource() const { return m_source; }
     bool videoAllowed() const;
     bool showReverseCamera() const;
@@ -32,6 +33,8 @@ public:
     Q_INVOKABLE void pressKey(const QString &key);
     Q_INVOKABLE void onRadioStarted();
     void handleKey(VehicleHal::Key key);
+    /** CarPlay/Android Auto: botões do volante vão para o celular quando ele toca. */
+    void setProjection(ProjectionController *projection);
 
 signals:
     void audioSourceChanged();
@@ -47,6 +50,7 @@ private:
     MediaPlayerController *m_player;
     AppSettings *m_settings;
     PhoneHal *m_phone;
+    ProjectionController *m_projection = nullptr;
     // O que estava tocando antes da ligação, para retomar depois.
     bool m_inCall = false;
     bool m_resumeMedia = false;
