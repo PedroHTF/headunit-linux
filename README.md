@@ -32,7 +32,7 @@ com o hardware do carro simulado.
 | Botões do volante (próxima, anterior, play, volume, mudo, fonte) | ✅ simulador e teclado |
 | Métricas: tempo até o 1º quadro, FPS, memória | ✅ |
 | **CarPlay / Android Auto** pelo dongle USB (Carlinkit) | ✅ simulado · 🟡 dongle real implementado, ainda não testado ([detalhes](docs/dongle.md)) |
-| **Telefone** (agenda, recentes, teclado, chamada recebida/ativa, botão do volante) | 🟡 simulado; real via oFono/BlueZ (HFP) e obexd (PBAP) |
+| **Telefone** (agenda, recentes, teclado, chamada recebida/ativa/em espera, mudo, botão do volante) | ✅ simulado · 🟡 real no Linux via oFono/BlueZ (HFP) e obexd (PBAP), testado com serviços simulados, ainda não com celular ([detalhes](docs/telefone.md)) |
 | **Equalizador** 10 bandas, predefinições, balanço, fader, loudness | 🟡 salvo e exibido; o som será processado pelo DSP da central |
 
 ## Rodar no Windows
@@ -57,6 +57,7 @@ headunit --fullscreen           tela cheia, como na central
 headunit --no-simulator         sem a janela do simulador
 headunit --page 3               abre direto numa tela (0 Início, 1 Mídia, 2 Rádio, 3 Telefone, 4 Veículo, 5 Projeção, 6 Configurações)
 headunit --call incoming        simula uma ligação chegando (ou --call active)
+headunit --phone ofono          telefone real pelo Bluetooth (padrão auto: oFono se houver; sim = simulado)
 headunit --equalizer            abre direto o equalizador
 headunit --dongle usb           usa o dongle CarPlay/Android Auto real (padrão: simulado)
 headunit --projection carplay   dongle simulado já com um iPhone conectado (ou androidauto)
@@ -79,6 +80,7 @@ src/media/            MediaLibrary (lista do pendrive) + MediaPlayerController
 src/hal/              Camada de hardware (HAL): a única parte que muda do PC para a central
   VehicleHal            ← SimulatedVehicleHal | (futuro) McuVehicleHal / SocketCAN
   RadioHal              ← SimulatedRadioHal  | (futuro) chip de rádio via MCU, RTL-SDR
+  PhoneHal              ← SimulatedPhoneHal  | OfonoPhoneHal (HFP via oFono) + PbapClient/VCard (agenda)
   DrivingRules          regras de segurança (vídeo em movimento, câmera de ré)
 src/perf/             PerfMonitor: 1º quadro, FPS, memória
 src/camera/           Câmera de ré: geometria em C++ puro (lente/fisheye, linhas, trajetória,
@@ -87,7 +89,7 @@ src/logo/             LogoManager: logo padrão ou arquivo do pendrive
 src/projection/       Dongle CarPlay/AA: protocolo, transporte USB (libusb) e simulado,
                       vídeo H.264 (FFmpeg), áudio, ProjectionController e ProjectionView
 src/audio/            Equalizer (10 bandas)
-tests/                Testes (Qt Test): rádio, regras/controle, biblioteca de mídia
+tests/                Testes (Qt Test): rádio, regras/controle, mídia, câmera, dongle, telefone (oFono/PBAP falsos)
 ```
 
 A montagem fica em `src/main.cpp`: na central, basta trocar `SimulatedVehicleHal` e

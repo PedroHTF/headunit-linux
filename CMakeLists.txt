@@ -25,6 +25,7 @@ qt_add_library(headunit_core STATIC
     src/hal/SimulatedRadioHal.h src/hal/SimulatedRadioHal.cpp
     src/hal/PhoneHal.h src/hal/PhoneHal.cpp
     src/hal/SimulatedPhoneHal.h src/hal/SimulatedPhoneHal.cpp
+    src/hal/VCard.h src/hal/VCard.cpp
     src/audio/Equalizer.h src/audio/Equalizer.cpp
     src/media/MediaLibrary.h src/media/MediaLibrary.cpp
     src/media/MediaPlayerController.h src/media/MediaPlayerController.cpp
@@ -67,6 +68,22 @@ if(FFMPEG_FOUND)
     message(STATUS "Vídeo H.264: FFmpeg encontrado")
 else()
     message(STATUS "Vídeo H.264: sem FFmpeg (vídeo do dongle real não será decodificado)")
+endif()
+# ---- Telefone real (oFono/BlueZ via D-Bus): só no Linux --------------------------------
+option(HEADUNIT_PHONE_DBUS "Telefone real via oFono/obexd (D-Bus)" ON)
+if(UNIX AND NOT APPLE AND HEADUNIT_PHONE_DBUS)
+    find_package(Qt6 6.4 QUIET COMPONENTS DBus)
+endif()
+if(HEADUNIT_PHONE_DBUS AND TARGET Qt6::DBus)
+    target_sources(headunit_core PRIVATE
+        src/hal/OfonoTypes.h
+        src/hal/OfonoPhoneHal.h src/hal/OfonoPhoneHal.cpp
+        src/hal/PbapClient.h src/hal/PbapClient.cpp)
+    target_compile_definitions(headunit_core PUBLIC HEADUNIT_HAVE_DBUS)
+    target_link_libraries(headunit_core PUBLIC Qt6::DBus)
+    message(STATUS "Telefone: oFono/PBAP via D-Bus disponível")
+else()
+    message(STATUS "Telefone: sem D-Bus (só telefone simulado)")
 endif()
 target_include_directories(headunit_core PUBLIC src)
 target_link_libraries(headunit_core PUBLIC Qt6::Core Qt6::Gui Qt6::Quick Qt6::Multimedia)
@@ -119,10 +136,18 @@ target_link_libraries(headunit PRIVATE headunit_core Qt6::Quick Qt6::QuickContro
 # ---- Testes ---------------------------------------------------------------------
 if(TARGET Qt6::Test)
     enable_testing()
-    foreach(t tst_radio tst_driving_rules tst_media_library tst_camera tst_logo_folders tst_phone_eq tst_dongle)
+    foreach(t tst_radio tst_driving_rules tst_media_library tst_camera tst_logo_folders tst_phone_eq tst_dongle tst_vcard)
         qt_add_executable(${t} tests/${t}.cpp)
         target_link_libraries(${t} PRIVATE headunit_core Qt6::Test)
         add_test(NAME ${t} COMMAND ${t})
         set_tests_properties(${t} PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
     endforeach()
+    # oFono e obexd falsos num D-Bus de sessão próprio (dbus-run-session), sem Bluetooth.
+    find_program(DBUS_RUN_SESSION dbus-run-session)
+    if(HEADUNIT_PHONE_DBUS AND TARGET Qt6::DBus AND DBUS_RUN_SESSION)
+        qt_add_executable(tst_ofono tests/tst_ofono.cpp)
+        target_link_libraries(tst_ofono PRIVATE headunit_core Qt6::Test Qt6::DBus)
+        add_test(NAME tst_ofono COMMAND ${DBUS_RUN_SESSION} -- $<TARGET_FILE:tst_ofono>)
+        set_tests_properties(tst_ofono PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+    endif()
 endif()

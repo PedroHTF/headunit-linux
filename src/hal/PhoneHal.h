@@ -25,7 +25,7 @@ struct RecentCall
  *
  * Implementações:
  *  - SimulatedPhoneHal: celular de mentira, com agenda e chamadas simuladas.
- *  - futuramente: OfonoPhoneHal (HFP pelo oFono/BlueZ via D-Bus) + agenda pelo PBAP (obexd).
+ *  - OfonoPhoneHal (Linux): chamadas HFP pelo oFono/BlueZ via D-Bus + agenda pelo PBAP (obexd).
  */
 class PhoneHal : public QObject
 {
@@ -44,6 +44,10 @@ class PhoneHal : public QObject
     Q_PROPERTY(bool muted READ isMuted NOTIFY changed)
     Q_PROPERTY(QVariantList contacts READ contactsVariant NOTIFY changed)
     Q_PROPERTY(QVariantList recents READ recentsVariant NOTIFY changed)
+    /** Baixando a agenda do celular agora. */
+    Q_PROPERTY(bool syncing READ isSyncing NOTIFY changed)
+    /** Texto curto sobre a agenda ("124 contatos", "Erro: ..."); vazio no simulado. */
+    Q_PROPERTY(QString phonebookStatus READ phonebookStatus NOTIFY changed)
 
 public:
     using QObject::QObject;
@@ -58,6 +62,8 @@ public:
     Q_INVOKABLE virtual void setMuted(bool muted) = 0;
     /** Tom de tecla durante a chamada (menus de atendimento). */
     Q_INVOKABLE virtual void sendDtmf(const QString &digit) = 0;
+    /** Baixa de novo a agenda e o histórico do celular (PBAP). */
+    Q_INVOKABLE virtual void refreshPhonebook() {}
 
     bool isConnected() const { return m_connected; }
     QString deviceName() const { return m_deviceName; }
@@ -69,6 +75,8 @@ public:
     QString callNumber() const { return m_callNumber; }
     int callSeconds() const { return m_callSeconds; }
     bool isMuted() const { return m_muted; }
+    bool isSyncing() const { return m_syncing; }
+    QString phonebookStatus() const { return m_phonebookStatus; }
     QVector<Contact> contacts() const { return m_contacts; }
     QVector<RecentCall> recents() const { return m_recents; }
 
@@ -88,6 +96,8 @@ protected:
     QString m_callNumber;
     int m_callSeconds = 0;
     bool m_muted = false;
+    bool m_syncing = false;
+    QString m_phonebookStatus;
     QVector<Contact> m_contacts;
     QVector<RecentCall> m_recents;
 

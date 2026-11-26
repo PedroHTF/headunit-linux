@@ -67,6 +67,15 @@ Item {
                 ListView {
                     clip: true; spacing: 4
                     model: phone.contacts
+                    Text {
+                        anchors.centerIn: parent
+                        visible: parent.count === 0
+                        width: parent.width - 40; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+                        color: Theme.textDim; font.pixelSize: Theme.fontNormal
+                        text: !phone.connected ? "Conecte o celular pelo Bluetooth para ver a agenda."
+                            : phone.syncing ? "Baixando a agenda do celular…"
+                            : "Agenda vazia. Confira no celular se o acesso aos contatos foi permitido."
+                    }
                     delegate: Row2 {
                         required property var modelData
                         title: modelData.name; subtitle: modelData.number; glyph: modelData.name.charAt(0)
@@ -142,11 +151,25 @@ Item {
                     text: "Sinal " + "▮".repeat(phone.signal) + "▯".repeat(5 - phone.signal) + "   Bateria " + phone.battery + "%"
                     color: Theme.textDim; font.pixelSize: Theme.fontSmall
                 }
+                Text {
+                    visible: phone.connected && phone.phonebookStatus !== ""
+                    Layout.fillWidth: true; wrapMode: Text.WordWrap
+                    text: "Agenda: " + phone.phonebookStatus
+                    color: Theme.textDim; font.pixelSize: Theme.fontSmall
+                }
+                IconButton {
+                    visible: !phone.simulated
+                    width: 200; height: 44; radius: 12; fontSize: 16
+                    text: phone.syncing ? "Atualizando…" : "⟳ Atualizar agenda"
+                    enabled: phone.connected && !phone.syncing
+                    onClicked: phone.refreshPhonebook()
+                }
                 Item { Layout.fillHeight: true }
                 Text {
                     Layout.fillWidth: true; wrapMode: Text.WordWrap
                     color: Theme.textDim; font.pixelSize: Theme.fontSmall
-                    text: (phone.simulated ? "Telefone simulado: use a janela Simulador para receber ligações. " : "") +
+                    text: (phone.simulated ? "Telefone simulado: use a janela Simulador para receber ligações. "
+                                          : "Parear um celular novo: por enquanto pelo bluetoothctl (docs/telefone.md). ") +
                           "O botão de telefone do volante atende e desliga (tecla T no PC)."
                 }
             }

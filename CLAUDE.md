@@ -32,12 +32,16 @@ Páginas (`--page`): 0 Início, 1 Mídia, 2 Rádio, 3 Telefone, 4 Veículo, 5 Pr
 `--gear R`, `--steering <graus>`, `--call incoming|active`, `--equalizer`,
 `--projection carplay|androidauto`, `--camera-setup`, `--media-tab 0|1|2`,
 `--ignition OFF|ACC|ON`, `--radio-on`, `--splash`, `--screenshot-simulator`,
-`--media <pasta>`, `--dongle usb`. Todas definidas em `src/main.cpp`.
+`--media <pasta>`, `--dongle usb`, `--phone auto|ofono|sim`. Todas definidas em `src/main.cpp`.
 
 CI (`.github/workflows/build.yml`): Linux (build, testes, captura) e Windows (Qt 6.8.3
 MSVC, `windeployqt`, artefato `headunit-windows` — ainda sem libusb/FFmpeg).
 
 ## Contêiner novo (nuvem)
+
+D-Bus no Qt 6.4: conecte sinais a slots **públicos** que recebem `QDBusMessage` (slots com
+`QDBusObjectPath`/`QDBusVariant` nos parâmetros são recusados). Os testes de D-Bus rodam em
+`dbus-run-session` com serviços falsos (`tests/tst_ofono.cpp`).
 
 Pacotes apt (os mesmos do CI): `qt6-base-dev qt6-declarative-dev qt6-multimedia-dev`,
 módulos `qml6-module-qtquick*`, `qml6-module-qtqml-workerscript`, `qml6-module-qtmultimedia`,
@@ -49,7 +53,8 @@ módulos `qml6-module-qtquick*`, `qml6-module-qtqml-workerscript`, `qml6-module-
 ```
 src/main.cpp          Monta tudo e trata a linha de comando (troque Simulated* pelos reais aqui)
 src/app/              AppController (controlador central) e AppSettings
-src/hal/              VehicleHal, RadioHal, PhoneHal (+ Simulated*), DrivingRules
+src/hal/              VehicleHal, RadioHal, PhoneHal (+ Simulated*), DrivingRules,
+                      OfonoPhoneHal + PbapClient + VCard (telefone real, Qt DBus, só Linux)
 src/media/            MediaLibrary (pasta = "pendrive"), FolderTree, MediaPlayerController
 src/camera/           Geometria em C++ puro (CameraModel, Undistort, Guidelines,
                       SyntheticScene), CameraSettings, item QML ReverseCamera
@@ -73,7 +78,8 @@ cuidado e documente em `docs/dongle.md`.
 ## Pendências conhecidas
 
 - Microfone (Siri/Assistente e ligações pelo dongle) e multitoque na projeção.
-- Telefone real: oFono/BlueZ (HFP) + obexd (PBAP).
+- Telefone real: implementado (oFono/obexd, `docs/telefone.md`), falta testar com celular,
+  tela de pareamento e roteamento do áudio da chamada no PipeWire.
 - Equalizador real: filtro do PipeWire ou DSP da central.
 - Pacote do Windows com libusb + FFmpeg para testar o dongle real.
 - Redesenho do layout a partir do Figma do dono; MCU, rádio e câmera reais (dados da central).

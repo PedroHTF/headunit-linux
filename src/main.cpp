@@ -5,6 +5,9 @@
 #include "logo/LogoManager.h"
 #include "audio/Equalizer.h"
 #include "hal/SimulatedPhoneHal.h"
+#ifdef HEADUNIT_HAVE_DBUS
+#include "hal/OfonoPhoneHal.h"
+#endif
 #include "projection/ProjectionController.h"
 #include "projection/ProjectionView.h"
 #include "hal/SimulatedRadioHal.h"
@@ -14,6 +17,7 @@
 #include "perf/PerfMonitor.h"
 
 #include <QCommandLineParser>
+#include <memory>
 #include <QDir>
 #include <QElapsedTimer>
 #include <QGuiApplication>
@@ -62,9 +66,11 @@ int main(int argc, char *argv[])
     const QCommandLineOption tabOpt(QStringLiteral("media-tab"), QStringLiteral("Aba inicial da Mídia: 0 Músicas, 1 Vídeos, 2 Pastas."), QStringLiteral("n"), QStringLiteral("0"));
     const QCommandLineOption simShotOpt(QStringLiteral("screenshot-simulator"),
         QStringLiteral("Com --screenshot, salva também a janela do simulador em <arquivo>."), QStringLiteral("arquivo"));
+    const QCommandLineOption phoneOpt(QStringLiteral("phone"),
+        QStringLiteral("Telefone: auto (oFono se houver), ofono ou sim (simulado)."), QStringLiteral("modo"), QStringLiteral("auto"));
     cli.addOptions({mediaOpt, noSimOpt, fullOpt, pageOpt, shotOpt, gearOpt, steerOpt, splashOpt, setupOpt,
                     ignOpt, radioOpt, tabOpt, simShotOpt, themeOpt, hcOpt, eqOpt, callOpt,
-                    dongleOpt, projOpt});
+                    dongleOpt, projOpt, phoneOpt});
     cli.process(app);
 
     QString mediaDir = cli.value(mediaOpt);
@@ -83,7 +89,24 @@ int main(int argc, char *argv[])
     if (cli.isSet(gearOpt)) vehicle.setGearByName(cli.value(gearOpt));
     if (cli.isSet(steerOpt)) vehicle.setSteering(cli.value(steerOpt).toDouble());
     if (cli.isSet(ignOpt)) vehicle.setIgnitionByName(cli.value(ignOpt));
-    SimulatedPhoneHal phone;
+    // Telefone: oFono (Bluetooth real) quando existir no sistema; senão, o simulado.
+    std::unique_ptr<PhoneHal> phoneHal;
+    SimulatedPhoneHal *simPhone = nullptr;
+    QString phoneMode = cli.value(phoneOpt);
+    if (phoneMode == u"auto") phoneMode = qEnvironmentVariable("HEADUNIT_PHONE", QStringLiteral("auto"));
+#ifdef HEADUNIT_HAVE_DBUS
+    if (phoneMode == u"ofono" || (phoneMode == u"auto" && OfonoPhoneHal::isAvailable(QDBusConnection::systemBus())))
+        phoneHal = std::make_unique<OfonoPhoneHal>(QDBusConnection::systemBus(), QDBusConnection::sessionBus());
+#else
+    if (phoneMode == u"ofono") qWarning("Telefone: compilado sem D-Bus; usando o simulado.");
+#endif
+    if (!phoneHal) {
+        auto sim = std::make_unique<SimulatedPhoneHal>();
+        simPhone = sim.get();
+        phoneHal = std::move(sim);
+    }
+    qInfo().noquote() << "Telefone:" << phoneHal->name();
+    PhoneHal &phone = *phoneHal;
     Equalizer equalizer;
     AppSettings settings;
     if (cli.isSet(themeOpt) || cli.isSet(hcOpt))
@@ -98,9 +121,9 @@ int main(int argc, char *argv[])
     if (cli.isSet(projOpt))
         QTimer::singleShot(400, &projection, [&projection, t = cli.value(projOpt)] { projection.simulatePhone(t); });
     PerfMonitor perf(sinceStart);
-    if (cli.isSet(callOpt)) {
-        phone.simulateIncoming(QStringLiteral("+55 11 98765-4321"));
-        if (cli.value(callOpt) == u"active") phone.accept();
+    if (cli.isSet(callOpt) && simPhone) {
+        simPhone->simulateIncoming(QStringLiteral("+55 11 98765-4321"));
+        if (cli.value(callOpt) == u"active") simPhone->accept();
     }
     if (cli.isSet(radioOpt)) {
         controller.onRadioStarted();
@@ -124,7 +147,7 @@ int main(int argc, char *argv[])
     ctx->setContextProperty(QStringLiteral("perf"), &perf);
     ctx->setContextProperty(QStringLiteral("settings"), &settings);
     ctx->setContextProperty(QStringLiteral("phone"), &phone);
-    ctx->setContextProperty(QStringLiteral("simPhone"), &phone);
+    ctx->setContextProperty(QStringLiteral("simPhone"), simPhone); // nulo com o telefone real
     ctx->setContextProperty(QStringLiteral("equalizer"), &equalizer);
     ctx->setContextProperty(QStringLiteral("projection"), &projection);
     ctx->setContextProperty(QStringLiteral("startEqualizer"), cli.isSet(eqOpt));

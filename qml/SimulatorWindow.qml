@@ -91,12 +91,19 @@ Window {
             }
 
             SectionTitle { text: "Telefone (Bluetooth)" }
+            Text {
+                visible: !simPhone
+                text: "Telefone real (" + phone.name + "): use o celular."
+                color: Theme.textDim; font.pixelSize: Theme.fontSmall
+            }
             RowLayout {
+                visible: !!simPhone
                 Layout.fillWidth: true
                 Switch { checked: phone.connected; onToggled: simPhone.setConnected(checked) }
                 Text { text: phone.connected ? "Celular conectado" : "Desconectado"; color: Theme.text; font.pixelSize: Theme.fontNormal }
             }
             Row {
+                visible: !!simPhone
                 spacing: 8
                 Choice { width: 150; text: "Receber ligação"; enabled: phone.connected && phone.callState === "idle"; onClicked: simPhone.simulateIncoming("+55 11 98765-4321") }
                 Choice { width: 150; text: "Outro lado desliga"; enabled: phone.callState !== "idle"; onClicked: simPhone.simulateRemoteHangup() }
