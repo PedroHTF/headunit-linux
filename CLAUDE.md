@@ -86,4 +86,5 @@ cuidado e documente em `docs/dongle.md`.
   tela de pareamento e roteamento do áudio da chamada no PipeWire.
 - Equalizador real: filtro do PipeWire ou DSP da central.
 - Pacote do Windows com libusb + FFmpeg para testar o dongle real.
-- Redesenho do layout a partir do Figma do dono; MCU, rádio e câmera reais (dados da central).
+- Redesenho do layout a partir do Figma do dono; MCU, rádio e câmera reais (central: H-Tech
+  HT-9864CA, Unisoc UIS8581A; detalhes em `docs/memoria.md`).
