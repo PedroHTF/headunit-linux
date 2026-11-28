@@ -4,6 +4,10 @@ Central multimídia automotiva com sistema próprio: Linux enxuto + C++/Qt 6 (QM
 pessoal (Honda HR-V). Desenvolvido e testado no PC com o hardware simulado; o CI gera o
 pacote para Windows. Projeto irmão: `PedroHTF/headunit-android` (Kotlin/Compose).
 
+
+> **Comece lendo `docs/memoria.md`** (estado do projeto, histórico de sessões, próximos passos)
+> e atualize-o ao fim de cada sessão.
+
 ## Regras de trabalho
 
 - **Sempre em português (pt-BR):** conversa, textos da interface, comentários, commits e docs.
